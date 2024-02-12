@@ -45,7 +45,7 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
     if (this->learningAgent.getBestRoot().first != this->lastBestRoot) {
-        // Update the best root befor loggin it PolicyStats
+        // Update the best root before loggin it to the PolicyStats
         this->lastBestRoot = this->learningAgent.getBestRoot().first;
         *this << "Generation " << this->generationNumber << " - Score "
               << this->learningAgent.getBestRoot().second->getResult()

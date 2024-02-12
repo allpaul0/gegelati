@@ -38,54 +38,60 @@
 #include <numeric>
 
 #include "learn/learningAgent.h"
-
 #include "log/laBasicLogger.h"
+
+Log::LABasicLogger::LABasicLogger(Learn::LearningAgent& la,
+    std::ostream& out, int colWidth, std::string separator) : LALogger(la, out)
+{
+    // fixing float precision
+    *this << std::setprecision(2) << std::fixed << std::right;
+    this->colWidth = colWidth;
+    this->separator = separator;
+    this->logHeader();
+}
 
 void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results)
+    const TPG::TPGVertex*>& results)
 {
     auto iter = results.begin();
     double min = iter->first->getResult();
     std::advance(iter, results.size() - 1);
     double max = iter->first->getResult();
-    double avg = std::accumulate(
-        results.begin(), results.end(), 0.0,
-        [](double acc,
-           std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                     const TPG::TPGVertex*>
-               pair) -> double { return acc + pair.first->getResult(); });
+    double avg = std::accumulate(results.begin(), results.end(), 0.0, 
+        [](double acc, 
+            std::pair<std::shared_ptr<Learn::EvaluationResult>, 
+            const TPG::TPGVertex*> pair) 
+        -> double { return acc + pair.first->getResult(); });
     avg /= (double)results.size();
-    *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
-          << std::setw(colWidth) << max;
+    *this << this->separator << std::setw(colWidth) << min 
+          << this->separator << std::setw(colWidth) << avg
+          << this->separator << std::setw(colWidth) << max;
 }
 
 void Log::LABasicLogger::logHeader()
 {
-    // First line of header
-    //*this << std::left;
-    *this << std::setw(2 * colWidth) << " " << std::setw(colWidth) << "Train";
+    *this << std::setw(colWidth) 
+          << "Gen" << this->separator << std::setw(colWidth) 
+          << "NbVert" << this->separator << std::setw(colWidth)
+          << "T_Min" << this->separator << std::setw(colWidth) 
+          << "T_Avg" << this->separator << std::setw(colWidth) 
+          << "T_Max";
     if (doValidation) {
-        *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
-              << "Valid";
+        *this << this->separator << std::setw(colWidth)
+          << "V_Min" << this->separator << std::setw(colWidth) 
+          << "V_Avg" << this->separator << std::setw(colWidth) 
+          << "V_Max";
     }
-    *this << std::endl;
-
-    // Second line of header
-    //*this << std::right;
-    *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
-          << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max";
-    if (doValidation) {
-        *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-              << std::setw(colWidth) << "Max";
-    }
-    *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
+    *this << this->separator << std::setw(colWidth) 
+          << "T_mutat" << this->separator << std::setw(colWidth)
           << "T_eval";
     if (doValidation) {
-        *this << std::setw(colWidth) << "T_valid";
+        *this << this->separator << std::setw(colWidth) 
+          << "T_valid";
     }
-    *this << std::setw(colWidth) << "T_total" << std::endl;
+    *this << this->separator << std::setw(colWidth) 
+          << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
@@ -99,15 +105,15 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 {
     this->mutationTime = getDurationFrom(*checkpoint);
 
-    *this << std::setw(colWidth)
+    *this << this->separator << std::setw(colWidth)
           << this->learningAgent.getTPGGraph()->getNbVertices();
-
+          
     chronoFromNow();
 }
 
 void Log::LABasicLogger::logAfterEvaluate(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results)
+    const TPG::TPGVertex*>& results)
 {
     evalTime = getDurationFrom(*checkpoint);
 
@@ -130,10 +136,11 @@ void Log::LABasicLogger::logAfterValidate(
 
 void Log::LABasicLogger::logEndOfTraining()
 {
-    *this << std::setw(colWidth) << mutationTime;
-    *this << std::setw(colWidth) << evalTime;
+    *this << this->separator << std::setw(colWidth) << mutationTime;
+    *this << this->separator << std::setw(colWidth) << evalTime;
     if (doValidation) {
-        *this << std::setw(colWidth) << validTime;
+        *this << this->separator << std::setw(colWidth) << validTime;
     }
-    *this << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
+    *this << this->separator << std::setw(colWidth) << getDurationFrom(*start) 
+    << std::endl;
 }

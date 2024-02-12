@@ -38,6 +38,7 @@
 #define LA_BASIC_LOGGER_H
 
 #include <iomanip>
+#include <string>
 
 #include "log/laLogger.h"
 
@@ -56,7 +57,15 @@ namespace Log {
         /**
          * Width of columns when logging values.
          */
-        int colWidth = 9;
+        int colWidth;
+
+        /**
+         * Separator used for differentiating the columns:
+         * - empty for the logs destined to the terminal
+         * - comma separated for the logs destined to be 
+         * post-treated by high-level langages 
+        */
+        std::string separator;
 
         /**
          * \brief Logs the min, avg and max score of the generation.
@@ -76,15 +85,13 @@ namespace Log {
          * LABasicLogger.
          * \param[in] out The output stream the logger will send
          * elements to.
+         * \param[in] colWidth To adapt the ouput to the terminal
+         * or to the CSV file for data analysis
+         * \param[in] separator Can be used for CSV file formatting
          */
         explicit LABasicLogger(Learn::LearningAgent& la,
-                               std::ostream& out = std::cout)
-            : LALogger(la, out)
-        {
-            // fixing float precision
-            *this << std::setprecision(2) << std::fixed << std::right;
-            this->logHeader();
-        }
+            std::ostream& out = std::cout, int colWidth = 9, 
+            std::string separator = " ");
 
         /**
          * Inherited via LaLogger
