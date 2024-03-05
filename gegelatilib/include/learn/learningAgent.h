@@ -129,17 +129,13 @@ namespace Learn {
          * \param[in] factory The TPGFactory used to create the TPGGraph. A
          * default TPGFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet,
-                      const LearningParameters& p,
-                      const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : learningEnvironment{le}, env(iSet, le.getDataSources(),
-                                           p.nbRegisters, p.nbProgramConstant),
-              tpg(factory.createTPGGraph(env)), params{p},
-              archive(p.archiveSize, p.archivingProbability)
+        LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p,
+         const TPG::TPGFactory& factory = TPG::TPGFactory())
+         : learningEnvironment{le}, env(iSet, le.getDataSources(), p.nbRegisters, p.nbProgramConstant),
+          tpg(factory.createTPGGraph(env)), params{p}, archive(p.archiveSize, p.archivingProbability)
         {
             // override the number of actions from the parameters.
-            this->params.mutation.tpg.nbActions =
-                this->learningEnvironment.getNbActions();
+            this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
         };
 
         /// Default destructor for polymorphism

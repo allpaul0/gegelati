@@ -73,9 +73,7 @@ void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
         pos2++; // skip the '|'
         pos3 = str.find("#");
         location = std::stoi(str.substr(pos2, pos3 - pos2));
-        str = str.substr(pos3 + 1,
-                         str.size() -
-                             pos3); // store the rest of the string and iterate
+        str = str.substr(pos3 + 1, str.size() - pos3); // store the rest of the string and iterate
 
         l.setOperand(o_idx, dataIndex, location, true);
         o_idx++;
@@ -114,8 +112,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
                 Program::Line& l = p.get()->addNewLine();
                 pos = label.find(this->lineSeparator);
                 instruction = label.substr(0, pos);
-                label = label.substr(pos + this->lineSeparator.size(),
-                                     label.size());
+                label = label.substr(pos + this->lineSeparator.size(), label.size());
 
                 // extract everything before pos (ie |)
                 // corresponds to instruction index
@@ -125,8 +122,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
                 // extract destination index;
                 pos2 = instruction.find("&");
                 pos1++; // skip the '|'
-                destinationIdx = std::stoi(instruction.substr(
-                    pos1, pos2 - pos1)); // extract and convert to int
+                destinationIdx = std::stoi(instruction.substr(pos1, pos2 - pos1)); // extract and convert to int
 
                 // extract operands as a string
                 pos2++; // skip the '$'
@@ -161,8 +157,7 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         pos1 = this->lastLine.find("|", pos);
         for (;;) {
             if (pos1 != std::string::npos) {
-                v_constant.push_back(
-                    {std::stoi(this->lastLine.substr(pos, pos1 - pos))});
+                v_constant.push_back({std::stoi(this->lastLine.substr(pos, pos1 - pos))});
             }
             else {
                 break;
@@ -174,12 +169,10 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         Program::Program* p = new Program::Program(this->tpg.getEnvironment());
         // set the previously read constants
         for (int i = 0; i < v_constant.size(); i++) {
-            p->getConstantHandler().setDataAt(typeid(Data::Constant), i,
-                                              v_constant.at(i));
+            p->getConstantHandler().setDataAt(typeid(Data::Constant), i, v_constant.at(i));
         }
         this->programID.insert(
-            std::pair<uint64_t, std::shared_ptr<Program::Program>>(
-                std::stoi(matches[1]), p));
+            std::pair<uint64_t, std::shared_ptr<Program::Program>>(std::stoi(matches[1]), p));
     }
 }
 
@@ -220,11 +213,9 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
         auto elmt = actionID.find(action_label);
         if (elmt == actionID.end()) {
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-                action_label, &this->tpg.addNewAction(action_label)));
+            this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(action_label, &this->tpg.addNewAction(action_label)));
         }
-        this->actionLabel.insert(
-            std::pair<uint64_t, uint64_t>(action_number, action_label));
+        this->actionLabel.insert(std::pair<uint64_t, uint64_t>(action_number, action_label));
     }
 }
 
@@ -287,27 +278,25 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
         uint64_t program = std::stoi(matches[2]);
 
         // find edge
-        const std::list<std::unique_ptr<TPG::TPGEdge>>& edges =
-            this->tpg.getEdges();
+        const std::list<std::unique_ptr<TPG::TPGEdge>>& edges = this->tpg.getEdges();
 
         // find one of the selected program edges :
         auto p_it = programID.find(program);
         if (p_it != programID.end()) {
             std::shared_ptr<Program::Program> p = p_it->second;
 
-            auto edge_it =
-                std::find_if(edges.begin(), edges.end(),
-                             [p](const std::unique_ptr<TPG::TPGEdge>& other) {
-                                 return (&(other->getProgram()) == p.get());
-                             });
+            auto edge_it = std::find_if(edges.begin(), edges.end(), 
+            [p](const std::unique_ptr<TPG::TPGEdge>& other) { 
+                return (&(other->getProgram()) == p.get()); 
+            });
+
             if (edge_it != edges.end()) // we got the corresponding edge :
             {
                 // then get the team :
                 auto team_it = this->vertexID.find(team_in);
                 if (team_it != this->vertexID.end()) {
                     const TPG::TPGVertex* team = team_it->second;
-                    this->tpg.addNewEdge(
-                        *team, *(edge_it->get()->getDestination()), p);
+                    this->tpg.addNewEdge(*team, *(edge_it->get()->getDestination()), p);
                 }
             }
         }
@@ -397,7 +386,6 @@ void File::TPGGraphDotImporter::setNewFilePath(const char* newFilePath)
     // open new one;
     pFile.open(newFilePath);
     if (!pFile.is_open()) {
-        throw std::runtime_error("Could not open file " +
-                                 std::string(newFilePath));
+        throw std::runtime_error("Could not open file " + std::string(newFilePath));
     }
 }

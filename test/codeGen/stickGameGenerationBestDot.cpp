@@ -176,8 +176,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
                                             .get()
                                             .getDataAt(typeid(int), i)
                                             .getSharedPointer<int>()
-                                            .get()))) +
-                      " ";
+                                            .get()))) + " ";
         }
         dataIn += std::to_string((*(le->getDataSources()
                                         .at(1)

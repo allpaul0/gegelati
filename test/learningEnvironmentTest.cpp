@@ -56,10 +56,8 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
 
   public:
     FakeLearningEnvironment() : LearningEnvironment(2), data(3){};
-    void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
-               uint64_t generationNumber){};
-    std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources()
+    void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber, uint64_t generationNumber){};
+    std::vector<std::reference_wrapper<const Data::DataHandler>>getDataSources()
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
         vect.push_back(data);
@@ -79,10 +77,8 @@ TEST(LearningEnvironmentTest, Clonable)
 {
     Learn::LearningEnvironment* le = new FakeLearningEnvironment();
 
-    ASSERT_FALSE(le->isCopyable())
-        << "Default behavior of isCopyable is false.";
-    ASSERT_EQ(le->clone(), (Learn::LearningEnvironment*)NULL)
-        << "Default behavior of clone is NULL.";
+    ASSERT_FALSE(le->isCopyable()) << "Default behavior of isCopyable is false.";
+    ASSERT_EQ(le->clone(), (Learn::LearningEnvironment*)NULL) << "Default behavior of clone is NULL.";
 
     // for code coverage
     le->reset();

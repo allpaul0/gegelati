@@ -87,8 +87,7 @@ class Environment
     const Instructions::Set instructionSet;
 
     /// List of DataHandler that can be accessed within this Environment.
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>
-        dataSources;
+    const std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources;
 
     /// Number of registers
     const size_t nbRegisters;
@@ -97,8 +96,7 @@ class Environment
     const size_t nbConstants;
 
     /// Vector of DataHandlers containing the environment's dataSources
-    std::vector<std::reference_wrapper<const Data::DataHandler>>
-        fakeDataSources;
+    std::vector<std::reference_wrapper<const Data::DataHandler>> fakeDataSources;
 
     /// DataHandler whost type corresponds to registers.
     const Data::PrimitiveTypeArray<double> fakeRegisters;
@@ -132,9 +130,10 @@ class Environment
      * value if the given std::vector was empty.
      */
     static size_t computeLargestAddressSpace(
-        const size_t nbRegisters, const size_t nbConstants,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers);
+        const size_t nbRegisters, 
+        const size_t nbConstants,
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers
+    );
 
     /**
      * \brief Static method used to compute the size of Program lines based on
@@ -168,10 +167,11 @@ class Environment
      * can be provided by at least one DataHandler are kept.
      */
     static Instructions::Set filterInstructionSet(
-        const Instructions::Set& iSet, const size_t nbRegisters,
+        const Instructions::Set& iSet, 
+        const size_t nbRegisters,
         const size_t nbConstants,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dataSources);
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSources
+    );
 
   private:
     /// Default constructor deleted for its uselessness.
@@ -194,27 +194,24 @@ class Environment
      */
     Environment(
         const Instructions::Set& iSet,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers,
-        const size_t nbRegs, const size_t nbConst = 0)
-        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
-                                              dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
-          fakeRegisters(nbRegs), fakeConstants(nbConst),
-          nbInstructions{instructionSet.getNbInstructions()},
-          maxNbOperands{instructionSet.getMaxNbOperands()},
-          nbDataSources{
-              dHandlers.size() +
-              (nbConst > 0 ? 2
-                           : 1)}, // if Constants are used, we need an extra
-                                  // datasource to store them in the environment
-          largestAddressSpace{
-              computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
-          lineSize{computeLineSize(*this)}
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers,
+        const size_t nbRegs, 
+        const size_t nbConst = 0
+    ): 
+        instructionSet{filterInstructionSet(iSet, nbRegs, nbConst, dHandlers)},
+        dataSources{dHandlers}, 
+        nbRegisters{nbRegs}, 
+        nbConstants{nbConst},
+        fakeRegisters(nbRegs), 
+        fakeConstants(nbConst),
+        nbInstructions{instructionSet.getNbInstructions()},
+        maxNbOperands{instructionSet.getMaxNbOperands()},
+        nbDataSources{dHandlers.size() +  (nbConst > 0 ? 2: 1)}, // if Constants are used, 
+        // we need an extra datasource to store them in the environment
+        largestAddressSpace{computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
+        lineSize{computeLineSize(*this)}
     {
-        this->fakeDataSources.push_back(
-            (std::reference_wrapper<const Data::DataHandler>)this
-                ->fakeRegisters);
+        this->fakeDataSources.push_back((std::reference_wrapper<const Data::DataHandler>)this->fakeRegisters);
 
         if (nbConst > 0) {
             this->fakeDataSources.push_back(this->fakeConstants);
@@ -281,8 +278,7 @@ class Environment
      * \return a const reference to the dataSources attribute of this
      * Environment.
      */
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-    getDataSources() const;
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& getDataSources() const;
 
     /**
      * Get the datasource identical to the one used by programs
@@ -292,8 +288,7 @@ class Environment
      * mutating a Program::Line and assessing whether a data type can be
      * provided by the registers.
      */
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-    getFakeDataSources() const;
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& getFakeDataSources() const;
 
     /**
      * \brief Get the Instruction Set of the Environment.

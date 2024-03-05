@@ -61,21 +61,18 @@ namespace Program {
         ProgramEngine() = delete;
 
         /// Registers used for the Program execution.
-        Data::PrimitiveTypeArray<double>
-            registers; // If the type of registers attribute is
-                       // changed one day
+        Data::PrimitiveTypeArray<double> registers; 
+        // If the type of registers attribute is changed one day
         // make sure to update the Program::identifyIntrons()
         // method as it create its own
         // Data::PrimitiveTypeArray<double> to keep track of
         // accessed addresses.
 
         /// Data sources from the environment used for archiving a program.
-        std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dataSources;
+        std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources;
 
         /// Data sources (including registers) used in the Program.
-        std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dataScsConstsAndRegs;
+        std::vector<std::reference_wrapper<const Data::DataHandler>> dataScsConstsAndRegs;
 
         /// Program counter of the execution engine.
         uint64_t programCounter;
@@ -123,20 +120,16 @@ namespace Program {
          * will be executed.
          */
         template <class T>
-        ProgramEngine(const Program& prog,
-                      const std::vector<std::reference_wrapper<T>>& dataSrc)
-            : programCounter{0},
-              registers{prog.getEnvironment().getNbRegisters()}, program{NULL}
+        ProgramEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc)
+            : programCounter{0}, registers{prog.getEnvironment().getNbRegisters()}, program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
-            static_assert(
-                std::is_convertible<T&, const Data::DataHandler&>::value);
+            static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
             if (prog.getEnvironment().getNbConstant() > 0) {
-                this->dataScsConstsAndRegs.push_back(
-                    prog.cGetConstantHandler());
+                this->dataScsConstsAndRegs.push_back(prog.cGetConstantHandler());
             }
 
             // Cannot use insert here because it dataSourcesAndRegisters
@@ -159,8 +152,7 @@ namespace Program {
          * \param[in] prog the const Program that will be executed by the
          * ProgramExecutionEngine.
          */
-        ProgramEngine(const Program& prog)
-            : ProgramEngine(prog, prog.getEnvironment().getDataSources()){};
+        ProgramEngine(const Program& prog): ProgramEngine(prog, prog.getEnvironment().getDataSources()){};
 
         /**
          * \brief operator parenthesis used when iterating through the program
@@ -253,8 +245,7 @@ namespace Program {
          * indexed DataHandler, with the given data type, or if the indexed
          *         DataHandler does not exist.
          */
-        const void fetchCurrentOperands(
-            std::vector<Data::UntypedSharedPtr>& operands) const;
+        const void fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const;
 
         /**
          * \brief Get the location for the current Instruction.
@@ -294,11 +285,9 @@ namespace Program {
         // Replace the references in attributes
         this->dataSources = dataSrc;
         // we need this offset to push the constant at the first
-        size_t offset =
-            this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
+        size_t offset = this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
         if (offset == 2) {
-            this->dataScsConstsAndRegs.at(1) =
-                this->program->cGetConstantHandler();
+            this->dataScsConstsAndRegs.at(1) = this->program->cGetConstantHandler();
         }
         for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
             this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);

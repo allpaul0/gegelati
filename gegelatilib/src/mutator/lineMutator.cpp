@@ -58,9 +58,13 @@
  * data source could be found for this Instruction and operandIdx couple.
  */
 static bool initRandomCorrectLineOperand(
-    const Instructions::Instruction& instruction, Program::Line& line,
-    const uint64_t& operandIdx, const bool initOperandDataSource,
-    const bool initOperandLocation, const bool forceChange, Mutator::RNG& rng)
+    const Instructions::Instruction& instruction, 
+    Program::Line& line,
+    const uint64_t& operandIdx, 
+    const bool initOperandDataSource,
+    const bool initOperandLocation, 
+    const bool forceChange, 
+    Mutator::RNG& rng)
 {
     const Environment& env = line.getEnvironment();
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
@@ -70,8 +74,7 @@ static bool initRandomCorrectLineOperand(
     if (initOperandDataSource && operandIdx < instruction.getNbOperands()) {
         // Select an operand
         // The type of operand needed
-        const std::type_info& operandType =
-            instruction.getOperandTypes().at(operandIdx).get();
+        const std::type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
 
         // keep a record of tested indexes
         std::set<uint64_t> operandDataSourceIndexes;
@@ -79,38 +82,28 @@ static bool initRandomCorrectLineOperand(
             operandDataSourceIndexes.insert(operandDataSourceIndex);
         }
 
-        while (!operandFound &&
-               operandDataSourceIndexes.size() < env.getNbDataSources()) {
+        while (!operandFound && operandDataSourceIndexes.size() < env.getNbDataSources()) {
             // Select an operandDataSourceIndex
-            operandDataSourceIndex =
-                rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) -
-                                            operandDataSourceIndexes.size());
+            operandDataSourceIndex = rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandDataSourceIndexes.size());
             // Correct the index with the number of already tested ones inferior
             // to it. This works because the set is ordered
-            std::for_each(operandDataSourceIndexes.begin(),
-                          operandDataSourceIndexes.end(),
-                          [&operandDataSourceIndex](uint64_t index) {
-                              if (index <= operandDataSourceIndex)
-                                  operandDataSourceIndex++;
-                          });
+            std::for_each(operandDataSourceIndexes.begin(), operandDataSourceIndexes.end(), [&operandDataSourceIndex](uint64_t index) {
+                if (index <= operandDataSourceIndex)
+                    operandDataSourceIndex++;
+            });
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
             // check if the selected dataSource can provide the type requested
             // by the instruction
-            operandFound = env.getFakeDataSources()
-                               .at(operandDataSourceIndex)
-                               .get()
-                               .canHandle(operandType);
+            operandFound = env.getFakeDataSources().at(operandDataSourceIndex).get().canHandle(operandType);
         }
     }
     else if (initOperandDataSource) {
         // The operand is not constrained in type
         operandFound = true;
         // Select a location
-        operandDataSourceIndex = rng.getUnsignedInt64(
-            0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
-        if (forceChange &&
-            operandDataSourceIndex >= line.getOperand(operandIdx).first) {
+        operandDataSourceIndex = rng.getUnsignedInt64(0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
+        if (forceChange && operandDataSourceIndex >= line.getOperand(operandIdx).first) {
             operandDataSourceIndex += 1;
         }
     }
@@ -119,10 +112,8 @@ static bool initRandomCorrectLineOperand(
     uint64_t operandLocation = line.getOperand(operandIdx).second;
     if (operandFound && initOperandLocation) {
         // Select a location
-        operandLocation = rng.getUnsignedInt64(
-            0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
-        if (forceChange &&
-            operandLocation >= line.getOperand(operandIdx).second) {
+        operandLocation = rng.getUnsignedInt64(0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
+        if (forceChange && operandLocation >= line.getOperand(operandIdx).second) {
             operandLocation += 1;
         }
     }
@@ -135,44 +126,35 @@ static bool initRandomCorrectLineOperand(
     return operandFound;
 }
 
-void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
-                                                 Mutator::RNG& rng)
+void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line, Mutator::RNG& rng)
 {
     const Environment& env = line.getEnvironment();
 
     // Select and set a destinationIndex. (can not fail)
-    uint64_t destinationIndex =
-        rng.getUnsignedInt64(0, env.getNbRegisters() - 1);
-    line.setDestinationIndex(
-        destinationIndex); // Should never throw.. but I did not deactivate the
-                           // check anyway.
+    uint64_t destinationIndex = rng.getUnsignedInt64(0, env.getNbRegisters() - 1);
+    line.setDestinationIndex(destinationIndex); // Should never throw.. but I did not deactivate the check anyway.
 
     // Select an instruction.
-    uint64_t instructionIndex =
-        rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
+    uint64_t instructionIndex = rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
     // Get the instruction
-    const Instructions::Instruction& instruction =
-        env.getInstructionSet().getInstruction(instructionIndex);
+    const Instructions::Instruction& instruction = env.getInstructionSet().getInstruction(instructionIndex);
     // Set the instructionIndex
-    line.setInstructionIndex(
-        instructionIndex); // Should never throw.. but I did not deactivate the
-                           // check anyway.
+    line.setInstructionIndex(instructionIndex); 
+    // Should never throw.. but I did not deactivate the check anyway.
 
     // Select operands needed by the instruction
     uint64_t operandIdx = 0;
     for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
         // Check if all operands were tested (and none were valid)
-        initRandomCorrectLineOperand(instruction, line, operandIdx, true, true,
-                                     false, rng);
+        initRandomCorrectLineOperand(instruction, line, operandIdx, true, true, false, rng);
 
         // This operation can (no longer) fail since commit abd7cd since
         // all Instruction are vetted when building the Environment
     }
 }
 
-void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
-                                            Mutator::RNG& rng)
+void Mutator::LineMutator::alterCorrectLine(Program::Line& line, Mutator::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
     const LineSize lineSize = line.getEnvironment().getLineSize();
@@ -184,26 +166,19 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         // InstructionIndex
         // Select a random Instruction (different from the current one)
         const uint64_t currentInstructionIndex = line.getInstructionIndex();
-        uint64_t newInstructionIndex = rng.getUnsignedInt64(
-            0, line.getEnvironment().getNbInstructions() - 2);
-        newInstructionIndex +=
-            (newInstructionIndex >= currentInstructionIndex) ? 1 : 0;
+        uint64_t newInstructionIndex = rng.getUnsignedInt64(0, line.getEnvironment().getNbInstructions() - 2);
+        newInstructionIndex += (newInstructionIndex >= currentInstructionIndex) ? 1 : 0;
         line.setInstructionIndex(newInstructionIndex);
 
         // Check if operands are compatible with the new instruction.
         // If not: mutate them
-        const Instructions::Instruction& instruction =
-            line.getEnvironment().getInstructionSet().getInstruction(
-                newInstructionIndex);
+        const Instructions::Instruction& instruction = line.getEnvironment().getInstructionSet().getInstruction(newInstructionIndex);
         for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
-            const std::type_info& type =
-                instruction.getOperandTypes().at(i).get();
+
+            const std::type_info& type = instruction.getOperandTypes().at(i).get();
             uint64_t dataSourceIndex = line.getOperand(i).first;
             bool isValid = false;
-            const Data::DataHandler& dataSource = line.getEnvironment()
-                                                      .getFakeDataSources()
-                                                      .at(dataSourceIndex)
-                                                      .get();
+            const Data::DataHandler& dataSource = line.getEnvironment().getFakeDataSources().at(dataSourceIndex).get();
             isValid = dataSource.canHandle(type);
             // Alter the operand if needed
             if (!isValid) {
@@ -212,58 +187,41 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
                 // is a check for Instructions viability during the Environment
                 // Construction. Hence, eithed isValid is true, OR a valid
                 // dataSource will be found among other data sources.
-                initRandomCorrectLineOperand(instruction, line, i, true, false,
-                                             true, rng);
+                initRandomCorrectLineOperand(instruction, line, i, true, false, true, rng);
             }
         }
     }
-    else if (selectedBit <
-             lineSize.nbInstructionBits + lineSize.nbDestinationBits) {
+    else if (selectedBit < lineSize.nbInstructionBits + lineSize.nbDestinationBits) {
         // DestinationIndex
         // Select a random destination (different from the current one)
         const uint64_t currentDestinationIndex = line.getDestinationIndex();
-        uint64_t newDestinationIndex =
-            rng.getUnsignedInt64(0, line.getEnvironment().getNbRegisters() - 2);
-        newDestinationIndex +=
-            (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
+        uint64_t newDestinationIndex = rng.getUnsignedInt64(0, line.getEnvironment().getNbRegisters() - 2);
+        newDestinationIndex += (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
         line.setDestinationIndex(newDestinationIndex);
     }
-    else if (selectedBit < lineSize.nbInstructionBits +
-                               lineSize.nbDestinationBits +
-                               lineSize.nbOperandsBits) {
+    else if (selectedBit < lineSize.nbInstructionBits + lineSize.nbDestinationBits + lineSize.nbOperandsBits) {
         // Which operand is selected
         // Equal position of selectedBit within operand bits, divided by the
         // total number of bits per operand.
-        const uint64_t operandIndex =
-            (selectedBit -
-             (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) /
-            (lineSize.nbOperandDataSourceIndexBits +
-             lineSize.nbOperandLocationBits);
-        const uint64_t currentOperandDataSourceIndex =
-            line.getOperand(operandIndex).first;
-        const uint64_t currentOperandLocation =
-            line.getOperand(operandIndex).second;
-        const Instructions::Instruction& instruction =
-            line.getEnvironment().getInstructionSet().getInstruction(
-                line.getInstructionIndex());
+        const uint64_t operandIndex = (selectedBit - (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) / (
+            lineSize.nbOperandDataSourceIndexBits + lineSize.nbOperandLocationBits);
+        const uint64_t currentOperandDataSourceIndex = line.getOperand(operandIndex).first;
+        const uint64_t currentOperandLocation = line.getOperand(operandIndex).second;
+        const Instructions::Instruction& instruction = line.getEnvironment().getInstructionSet().getInstruction(line.getInstructionIndex());
 
         // Operands dataSourceIndex or Location
         // Same as before, but with modulo instead of division.
         // Result of modulo is compared with the number of bits per operand for
         // the operandSourceIndex encoding
-        if (((selectedBit -
-              (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) %
-             (lineSize.nbOperandDataSourceIndexBits +
-              lineSize.nbOperandLocationBits)) <
-            lineSize.nbOperandDataSourceIndexBits) {
+        if (((selectedBit - (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) % (lineSize.nbOperandDataSourceIndexBits + 
+            lineSize.nbOperandLocationBits)) < lineSize.nbOperandDataSourceIndexBits) {
+           
             // Operand data source index
-            initRandomCorrectLineOperand(instruction, line, operandIndex, true,
-                                         false, true, rng);
+            initRandomCorrectLineOperand(instruction, line, operandIndex, true, false, true, rng);
         }
         else {
             // Location (no fail thanks to scaling)
-            initRandomCorrectLineOperand(instruction, line, operandIndex, false,
-                                         true, true, rng);
+            initRandomCorrectLineOperand(instruction, line, operandIndex, false, true, true, rng);
         }
     }
 }

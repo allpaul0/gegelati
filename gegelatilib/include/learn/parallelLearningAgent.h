@@ -79,8 +79,7 @@ namespace Learn {
          */
         virtual void evaluateAllRootsInParallel(
             uint64_t generationNumber, LearningMode mode,
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
+            std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results);
 
         /**
          * \brief Subfunction of evaluateAllRootsInParallel which handles the
@@ -98,9 +97,7 @@ namespace Learn {
          */
         virtual void evaluateAllRootsInParallelExecute(
             uint64_t generationNumber, LearningMode mode,
-            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
-                resultsPerJobMap,
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>& resultsPerJobMap,
             std::map<uint64_t, Archive*>& archiveMap);
 
         /**
@@ -119,11 +116,8 @@ namespace Learn {
          * of the other jobs.
          */
         virtual void evaluateAllRootsInParallelCompileResults(
-            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
-                resultsPerJobMap,
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>& resultsPerJobMap,
+            std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results,
             std::map<uint64_t, Archive*>& archiveMap);
 
         /**
@@ -147,12 +141,11 @@ namespace Learn {
          * declared LearningEnvironment, otherwise the method will clone it.
          */
         void slaveEvalJobThread(
-            uint64_t generationNumber, LearningMode mode,
+            uint64_t generationNumber, 
+            LearningMode mode,
             std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
             std::mutex& rootsToProcessMutex,
-            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
-                resultsPerRootMap,
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>& resultsPerRootMap,
             std::mutex& resultsPerRootMapMutex,
             std::map<uint64_t, Archive*>& archiveMap,
             std::mutex& archiveMapMutex, bool useMainEnvironment);

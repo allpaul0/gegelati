@@ -41,8 +41,7 @@
 
 size_t Data::DataHandler::count = 0;
 
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
+Data::DataHandler::DataHandler() : id{count++}, cachedHash(), invalidCachedHash(true){};
 
 size_t Data::DataHandler::getId() const
 {
@@ -58,8 +57,7 @@ size_t Data::DataHandler::getHash() const
     return this->cachedHash;
 }
 
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
+uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation, const std::type_info& type) const
 {
     return rawLocation % this->getAddressSpace(type);
 }

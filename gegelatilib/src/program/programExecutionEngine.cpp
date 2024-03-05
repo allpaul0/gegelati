@@ -44,14 +44,12 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
     // Get everything needed (may throw)
     const Line& line = this->getCurrentLine();
-    const Instructions::Instruction& instruction =
-        this->getCurrentInstruction();
+    const Instructions::Instruction& instruction = this->getCurrentInstruction();
     this->fetchCurrentOperands(operands);
 
     double result = instruction.execute(operands);
 
-    this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
-                              result);
+    this->registers.setDataAt(typeid(double), line.getDestinationIndex(), result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(
@@ -64,8 +62,7 @@ double Program::ProgramExecutionEngine::executeProgram(
 
     // Returns the 0-indexed register.
     // cast to primitiveType<double> to enable cast to double.
-    return *(this->registers.getDataAt(typeid(double), 0)
-                 .getSharedPointer<const double>());
+    return *(this->registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
 }
 
 void Program::ProgramExecutionEngine::processLine()

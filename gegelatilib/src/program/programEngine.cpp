@@ -53,16 +53,14 @@ void Program::ProgramEngine::setProgram(const Program& prog)
     // offset is -1 if there is only the registers to ignore
     // -2 because we don't count the registers that are the first datasources
     // and the constants (second datasource)
-    if (this->dataScsConstsAndRegs.size() - offset !=
-        prog.getEnvironment().getDataSources().size()) {
+    if (this->dataScsConstsAndRegs.size() - offset != prog.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
     }
     for (size_t i = 0; i < this->dataScsConstsAndRegs.size() - offset; i++) {
         // check data source characteristics
-        auto& iDataSrc =
-            this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
+        auto& iDataSrc = this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
         auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
@@ -87,8 +85,7 @@ void Program::ProgramEngine::setProgram(const Program& prog)
     this->programCounter = 0;
 }
 
-const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::
-    ProgramEngine::getDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::ProgramEngine::getDataSources() const
 {
     return this->dataSources;
 }
@@ -99,8 +96,7 @@ const bool Program::ProgramEngine::next()
     // increment the program counter.
     do {
         this->programCounter++;
-    } while (this->programCounter < this->program->getNbLines() &&
-             this->program->isIntron(this->programCounter));
+    } while (this->programCounter < this->program->getNbLines() && this->program->isIntron(this->programCounter));
     return this->programCounter < this->program->getNbLines();
 }
 

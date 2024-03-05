@@ -152,14 +152,10 @@ const LineSize Environment::computeLineSize(const Environment& env)
     LineSize result;
     result.nbInstructionBits = (size_t)(ceill(log2l((long double)n)));
     result.nbDestinationBits = (size_t)ceill(log2l((long double)i));
-    result.nbOperandDataSourceIndexBits =
-        (size_t)(ceill(log2l((long double)nbSrc)));
-    result.nbOperandLocationBits =
-        (size_t)ceill(log2l((long double)largestAddressSpace));
-    result.nbOperandsBits = (size_t)(m * (result.nbOperandDataSourceIndexBits +
-                                          result.nbOperandLocationBits));
-    result.totalNbBits = result.nbInstructionBits + result.nbDestinationBits +
-                         result.nbOperandsBits;
+    result.nbOperandDataSourceIndexBits = (size_t)(ceill(log2l((long double)nbSrc)));
+    result.nbOperandLocationBits = (size_t)ceill(log2l((long double)largestAddressSpace));
+    result.nbOperandsBits = (size_t)(m * (result.nbOperandDataSourceIndexBits + result.nbOperandLocationBits));
+    result.totalNbBits = result.nbInstructionBits + result.nbDestinationBits + result.nbOperandsBits;
 
     return result;
 }

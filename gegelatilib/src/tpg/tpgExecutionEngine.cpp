@@ -65,8 +65,7 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 
     // Put the result in the archive before returning it.
     if (this->archive != NULL) {
-        this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),
-                                    result);
+        this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),result);
     }
 
     return result;
@@ -127,8 +126,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     // Browse the TPG until a TPGAction is reached.
     while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
-        const TPGEdge& edge =
-            this->evaluateTeam(*(const TPGTeam*)currentVertex);
+        const TPGEdge& edge = this->evaluateTeam(*(const TPGTeam*)currentVertex);
         // update currentVertex and backup in visitedVertex.
         currentVertex = edge.getDestination();
         visitedVertices.push_back(currentVertex);
