@@ -41,19 +41,15 @@
 #include "codeGen/tpgStackGenerationEngine.h"
 #include "codeGen/tpgSwitchGenerationEngine.h"
 
-CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory()
-    : TPGGenerationEngineFactory(switchMode){};
+CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(): TPGGenerationEngineFactory(switchMode){};
 
-CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
-    enum generationEngineMode mode)
+CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(enum generationEngineMode mode)
 {
     this->mode = mode;
 }
 
-std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
-    TPGGenerationEngineFactory::create(const std::string& filename,
-                                       const TPG::TPGGraph& tpg,
-                                       const std::string& path)
+std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::TPGGenerationEngineFactory::create(
+    const std::string& filename, const TPG::TPGGraph& tpg, const std::string& path)
 {
     if (this->mode == stackMode) {
         return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path);

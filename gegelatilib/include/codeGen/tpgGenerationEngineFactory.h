@@ -77,7 +77,8 @@ namespace CodeGen {
          * @return a unique_ptr<TPGGenerationEngine>.
          */
         std::unique_ptr<TPGGenerationEngine> create(
-            const std::string& filename, const TPG::TPGGraph& tpg,
+            const std::string& filename,
+            const TPG::TPGGraph& tpg,
             const std::string& path = "./");
 
       private:

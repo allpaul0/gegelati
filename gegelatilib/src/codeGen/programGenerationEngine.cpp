@@ -110,9 +110,9 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
         this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(printTemplate);
     std::string operandValue;
-    for (auto itr = std::sregex_iterator(printTemplate.begin(),
-                                         printTemplate.end(), operand_regex);
-         itr != std::sregex_iterator(); ++itr) {
+    for (auto itr = std::sregex_iterator(printTemplate.begin(), printTemplate.end(), operand_regex);
+    itr != std::sregex_iterator(); ++itr) {
+        
         const std::string& match = (*itr).str();
         auto pos = codeLine.find(match);
         // get number after character '$'
@@ -152,9 +152,7 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant)
     }
 }
 
-void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
-                                                const std::string& path,
-                                                size_t nbConstant)
+void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename, const std::string& path, size_t nbConstant)
 {
     if (filename.size() == 0) {
         std::cout << "filename is empty" << std::endl;

@@ -43,6 +43,7 @@ Thumbs.db
 # Content of these folders
 /bin
 /doc
+.vscode
 
 # CLion generated files
 **/.idea/

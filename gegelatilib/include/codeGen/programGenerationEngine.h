@@ -114,9 +114,7 @@ namespace CodeGen {
          * be generated. By default, the file is generated in the current
          * directory.
          */
-        ProgramGenerationEngine(const std::string& filename,
-                                const Environment& env,
-                                const std::string& path = "./")
+        ProgramGenerationEngine(const std::string& filename, const Environment& env, const std::string& path = "./")
             : ProgramEngine(env), dataPrinter()
         {
             openFile(filename, path, env.getNbConstant());
@@ -140,9 +138,7 @@ namespace CodeGen {
          * \param[in] path const reference to the path in which the file is
          * generated
          */
-        ProgramGenerationEngine(const std::string& filename,
-                                const Program::Program& p,
-                                const std::string& path = "./")
+        ProgramGenerationEngine(const std::string& filename, const Program::Program& p, const std::string& path = "./")
             : ProgramEngine(p), dataPrinter()
         {
             openFile(filename, path, p.getEnvironment().getNbConstant());
@@ -189,8 +185,7 @@ namespace CodeGen {
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
          */
-        void generateProgram(uint64_t progID,
-                             const bool ignoreException = false);
+        void generateProgram(uint64_t progID, const bool ignoreException = false);
 
       protected:
         /**
@@ -219,8 +214,7 @@ namespace CodeGen {
          * @return a copy of the printTemplate with the variables changed
          * according to the operand of the instruction.
          */
-        std::string completeFormat(
-            const Instructions::Instruction& instruction) const;
+        std::string completeFormat(const Instructions::Instruction& instruction) const;
 
         /**
          * \brief Function used to open the file that is generated.
@@ -234,8 +228,7 @@ namespace CodeGen {
          * \param[in] nbConstant number of constant used in the program of the
          * TPG.
          */
-        void openFile(const std::string& filename, const std::string& path,
-                      size_t nbConstant);
+        void openFile(const std::string& filename, const std::string& path, size_t nbConstant);
 
         /**
          * \brief Function called to generate the initialization of all operands

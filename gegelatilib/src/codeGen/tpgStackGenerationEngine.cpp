@@ -41,8 +41,7 @@
 #include "codeGen/tpgStackGenerationEngine.h"
 
 CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(
-    const std::string& filename, const TPG::TPGGraph& tpg,
-    const std::string& path)
+    const std::string& filename, const TPG::TPGGraph& tpg, const std::string& path)
     : TPGGenerationEngine(filename, tpg, path)
 {
 }

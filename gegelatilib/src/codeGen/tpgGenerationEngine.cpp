@@ -41,19 +41,17 @@
 #include "data/demangle.h"
 #include "util/timestamp.h"
 
-CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
-                                                  const TPG::TPGGraph& tpg,
-                                                  const std::string& path)
-    : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
-                                                       filenameProg,
-                                                   tpg.getEnvironment(), path}
+CodeGen::TPGGenerationEngine::TPGGenerationEngine(
+    const std::string& filename, const TPG::TPGGraph& tpg, const std::string& path)
+    : TPGAbstractEngine(tpg), progGenerationEngine{filename + filenameProg,  tpg.getEnvironment(), path}
 {
-    this->fileMain.open(path + filename + ".c", std::ofstream::out);
-    this->fileMainH.open(path + filename + ".h", std::ofstream::out);
+    std::string SfilenameGraph = filename + filenameGraph;
+    std::string SfilenamePrograms = filename + filenameProg;
+    
+    this->fileMain.open(path + SfilenameGraph + ".c", std::ofstream::out);
+    this->fileMainH.open(path + SfilenameGraph + ".h", std::ofstream::out);
     if (!fileMain.is_open() || !fileMainH.is_open()) {
-        throw std::runtime_error("Error can't open " +
-                                 std::string(path + filename) + ".c or " +
-                                 std::string(path + filename) + ".h");
+        throw std::runtime_error("Error can't open " + std::string(path + SfilenameGraph) + ".c or " + std::string(path + SfilenameGraph) + ".h");
     }
 
     fileMain << "/**\n"
@@ -63,8 +61,8 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
              << ".\n"
              << " */\n\n";
 
-    fileMain << "#include \"" << filename << ".h\"" << std::endl;
-    fileMain << "#include \"" << filename << "_" << filenameProg << ".h\""
+    fileMain << "#include \"" << SfilenameGraph << ".h\"" << std::endl;
+    fileMain << "#include \"" << SfilenamePrograms << ".h\""
              << std::endl;
 
     fileMainH << "/**\n"
@@ -73,8 +71,8 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
               << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
               << ".\n"
               << " */\n\n";
-    fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
-    fileMainH << "#define C_" << filename << "_H\n" << std::endl;
+    fileMainH << "#ifndef C_" << SfilenameGraph << "_H" << std::endl;
+    fileMainH << "#define C_" << SfilenameGraph << "_H\n" << std::endl;
 };
 
 CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
