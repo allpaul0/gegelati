@@ -41,8 +41,7 @@
 
 size_t Environment::computeLargestAddressSpace(
     const size_t nbRegisters, const size_t nbConstants,
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-        dHandlers)
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers)
 {
     size_t res = nbRegisters > nbConstants ? nbRegisters : nbConstants;
     for (auto dHandler : dHandlers) {
@@ -55,8 +54,7 @@ size_t Environment::computeLargestAddressSpace(
 Instructions::Set Environment::filterInstructionSet(
     const Instructions::Set& iSet, const size_t nbRegisters,
     const size_t nbConstants,
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-        dataSources)
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSources)
 {
     Instructions::Set filteredSet;
 
@@ -64,16 +62,15 @@ Instructions::Set Environment::filterInstructionSet(
     Data::ConstantHandler fakeConstants(nbConstants);
 
     // Check if all instructions can be used for the given DataHandlers
-    for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions();
-         idxInstruction++) {
-        const Instructions::Instruction& instruction =
-            iSet.getInstruction(idxInstruction);
+    for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions(); idxInstruction++) {
+
+        const Instructions::Instruction& instruction = iSet.getInstruction(idxInstruction);
+
         // Check that all operands can be provided by at least one DataHandler
         bool allOperandsHandled = true;
-        for (uint64_t idxOperand = 0; idxOperand < instruction.getNbOperands();
-             idxOperand++) {
-            const std::type_info& type =
-                instruction.getOperandTypes().at(idxOperand).get();
+        for (uint64_t idxOperand = 0; idxOperand < instruction.getNbOperands(); idxOperand++) {
+
+            const std::type_info& type = instruction.getOperandTypes().at(idxOperand).get();
             // Check DataHandlers for this type until one is found
             bool isHandled = false;
             // Check registers double first

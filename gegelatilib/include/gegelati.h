@@ -116,9 +116,9 @@
 #include <tpg/instrumented/tpgActionInstrumented.h>
 #include <tpg/instrumented/tpgEdgeInstrumented.h>
 #include <tpg/instrumented/tpgExecutionEngineInstrumented.h>
-#include <tpg/instrumented/tpgInstrumentedFactory.h>
+#include <tpg/instrumented/tpgFactoryInstrumented.h>
 #include <tpg/instrumented/tpgTeamInstrumented.h>
-#include <tpg/instrumented/tpgVertexInstrumentation.h>
+#include <tpg/instrumented/tpgVertexInstrumented.h>
 
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>

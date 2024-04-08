@@ -44,11 +44,11 @@ namespace TPG {
      * \brief Instrumentation code for TPGVertex class for instrumented
      * execution.
      */
-    class TPGVertexInstrumentation
+    class TPGVertexInstrumented
     {
       public:
         /**
-         * \brief Get the number of time a TPGVertexInstrumentation was visited.
+         * \brief Get the number of time a tpgVertexInstrumented was visited.
          */
         uint64_t getNbVisits() const;
 
@@ -69,7 +69,7 @@ namespace TPG {
          *
          * This constructor initializes the instrumentation attributes.
          */
-        TPGVertexInstrumentation() : nbVisits{0}
+        TPGVertexInstrumented() : nbVisits{0}
         {
         }
 

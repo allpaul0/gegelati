@@ -33,19 +33,19 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "tpg/instrumented/tpgVertexInstrumented.h"
 
-uint64_t TPG::TPGVertexInstrumentation::getNbVisits() const
+uint64_t TPG::TPGVertexInstrumented::getNbVisits() const
 {
     return this->nbVisits;
 }
 
-void TPG::TPGVertexInstrumentation::incrementNbVisits() const
+void TPG::TPGVertexInstrumented::incrementNbVisits() const
 {
     this->nbVisits++;
 }
 
-void TPG::TPGVertexInstrumentation::reset() const
+void TPG::TPGVertexInstrumented::reset() const
 {
     this->nbVisits = 0;
 }

@@ -52,7 +52,7 @@
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
 #ifndef PARAM_FLOAT_PRECISION
@@ -107,7 +107,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         set.add(*(new Instructions::MultByConstant<double>()));
         e = new Environment(set, vect, 8, 1);
         tpg = new TPG::TPGGraph(
-            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
+            *e, std::make_unique<TPG::TPGFactoryInstrumented>());
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {

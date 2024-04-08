@@ -36,7 +36,7 @@
 #ifndef TPG_ACTION_INSTRUMENTED_H
 #define TPG_ACTION_INSTRUMENTED_H
 
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "tpg/instrumented/tpgVertexInstrumented.h"
 #include "tpg/tpgAction.h"
 
 namespace TPG {
@@ -45,7 +45,7 @@ namespace TPG {
      * \brief Instrumented TPGAction
      */
     class TPGActionInstrumented : public TPG::TPGAction,
-                                  public TPG::TPGVertexInstrumentation
+                                  public TPG::TPGVertexInstrumented
     {
       public:
         /// Main constructor for TPGActionInstrumented.

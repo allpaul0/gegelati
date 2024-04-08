@@ -47,11 +47,11 @@ namespace TPG {
     ///
     /// Also contains a helper function for resetting the instrumentation of a
     /// TPGGraph.
-    class TPGInstrumentedFactory : public TPGFactory
+    class TPGFactoryInstrumented : public TPGFactory
     {
       public:
         /// Specialization of the method returing the TPGGraph with a
-        /// TPGInstrumentedFactory as an attribute.
+        /// TPGFactoryInstrumented as an attribute.
         virtual std::shared_ptr<TPGGraph> createTPGGraph(
             const Environment& env) const override;
 
@@ -88,14 +88,14 @@ namespace TPG {
          * - The TPGEdge with a number of traversal equal to zero.
          *
          * The method will do nothing on a TPGGraph whose TPGVertex and TPGEdge
-         * are not TPGVertexInstrumentation and TPGEdgeInstrumented
+         * are not tpgVertexInstrumented and TPGEdgeInstrumented
          * specializations.
          *
          * Beware, this function may remove TPGAction from the TPGGraph, thus
          * making it improper for future training.
          *
          * \param[in] tpg Reference to the TPGGraph whose
-         * TPGVertexInstrumentation and TPGEdge will be removed.
+         * tpgVertexInstrumented and TPGEdge will be removed.
          */
         void clearUnusedTPGGraphElements(TPG::TPGGraph& tpg) const;
     };

@@ -37,8 +37,7 @@
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 
-std::shared_ptr<TPG::TPGGraph> TPG::TPGFactory::createTPGGraph(
-    const Environment& env) const
+std::shared_ptr<TPG::TPGGraph> TPG::TPGFactory::createTPGGraph(const Environment& env) const
 {
     return std::make_shared<TPG::TPGGraph>(env, std::make_unique<TPGFactory>());
 }

@@ -47,6 +47,10 @@
 #include "tpg/tpgVertex.h"
 
 namespace TPG {
+
+    // Declare the TPGFactoryInstrumented class to be used as a parameter.
+    class TPGFactoryInstrumented;
+
     /**
      * \brief Class for storing a Tangled-Program-Graph.
      */
@@ -59,10 +63,10 @@ namespace TPG {
          * \param[in] e the Environment for the TPGGraph.
          * \param[in] f the TPGFactory used to create the graph elements.
          */
-        TPGGraph(const Environment& e,
-                 std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
-            : env{e}, factory{std::move(f)} {};
-
+        TPGGraph(const Environment& e, 
+                std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
+        : env{e}, factory{std::move(f)} {};
+                
         /**
          * \brief delete copy constructor
          */
@@ -91,9 +95,25 @@ namespace TPG {
         }
 
         /**
+         * \brief TPGGraph clone operator
+         * Copies a TPG and assigns it a new TPGFactory or TPGFactoryInstrumented
+         * Can be used in a Trainer to Instrument a trained TPGGraph and later clear
+         * its Hitchhickers
+         * 
+         * \param[in] f the TPGFactory to use for this TPG
+        */
+        TPGGraph& clone(std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>());
+
+        /**
          *	\brief assignement operator for class TPGGraph
          */
         TPGGraph& operator=(TPGGraph model);
+
+        /**
+         *	\brief clone method for the class TPGGraph
+         *  Gives the possibility to switch to a tpgFactoryInstrumented
+         */
+        //TPGGraph& clone(std::unique_ptr<TPG::TPGFactoryInstrumented> tpgFactoryInstrumented);
 
         /**
          * \brief Destructor for the TPGGraph.
@@ -306,7 +326,7 @@ namespace TPG {
         const Environment& env;
 
         /// TPGFactory of the TPGGraph
-        const std::unique_ptr<TPGFactory> factory;
+        std::unique_ptr<TPGFactory> factory;
 
         /**
          * \brief Set of TPGVertex composing the TPGGraph.
@@ -338,8 +358,7 @@ namespace TPG {
          *         the searched edge pointer. If the given vertex pointer is
          *         not in the vertices, then vertices.end() is returned.
          */
-        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
-            const TPGEdge* edge);
+        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(const TPGEdge* edge);
     };
 }; // namespace TPG
 

@@ -59,7 +59,7 @@ namespace TPG {
      * - TPGGraph
      * - TPGTeam
      * - TPGAction
-     * - TPGVertex
+     * - TPGEdge
      *
      * The factory also enables the creation of TPGExecutionEngine.
      *
@@ -77,8 +77,7 @@ namespace TPG {
          *
          * \param[in] env Environment used to build the TPGGraph.
          */
-        virtual std::shared_ptr<TPGGraph> createTPGGraph(
-            const Environment& env) const;
+        virtual std::shared_ptr<TPGGraph> createTPGGraph(const Environment& env) const;
 
         /**
          * \brief Create a TPGTeam for a TPGGraph.
@@ -124,8 +123,7 @@ namespace TPG {
          * \return the returned TPGExecutionEngine returned as an unique_ptr.
          */
         virtual std::unique_ptr<TPG::TPGExecutionEngine>
-        createTPGExecutionEngine(const Environment& env,
-                                 Archive* arch = NULL) const;
+        createTPGExecutionEngine(const Environment& env, Archive* arch = NULL) const;
     };
 
 } // namespace TPG

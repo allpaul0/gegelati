@@ -46,7 +46,7 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/tpgGraph.h"
 
 #include "tpg/instrumented/executionStats.h"
@@ -119,9 +119,9 @@ class ExecutionStatsTest : public ::testing::Test
         // All Edges have a unique Program, except T1->A0 and T0->A0 which
         // share the same program: progPointers.at(0)
 
-        // The TPG is given a TPGInstrumentedFactory to enable instrumentation
+        // The TPG is given a TPGFactoryInstrumented to enable instrumentation
         tpg = new TPG::TPGGraph(
-            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
+            *e, std::make_unique<TPG::TPGFactoryInstrumented>());
         for (int i = 0; i < 4; i++) {
             tpg->addNewTeam();
         }

@@ -49,11 +49,32 @@ TPG::TPGGraph::~TPGGraph()
     }
 }
 
+TPG::TPGGraph& TPG::TPGGraph::clone(std::unique_ptr<TPGFactory> f){
+    // Create a copy of *this
+    TPG::TPGGraph& clonedTPG = *this;
+
+    // Reset the factory to the new one
+    clonedTPG.factory = std::move(f);
+
+    // Return a reference to the cloned object
+    return clonedTPG;
+}
+
+
 TPG::TPGGraph& TPG::TPGGraph::operator=(TPGGraph model)
 {
     swap(*this, model);
     return *this;
 }
+
+
+// Method to clone and update factory
+/*TPG::TPGGraph& TPG::TPGGraph::clone(std::unique_ptr<TPG::TPGFactoryInstrumented> tpgFactoryInstrumented){
+    // Release the previous factory
+    this->factory.reset();
+    // Assign the new factory
+    this->factory = std::move(*tpgFactoryInstrumented);
+}*/
 
 void TPG::TPGGraph::clear()
 {
@@ -99,26 +120,25 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getVertices() const
 
 uint64_t TPG::TPGGraph::getNbRootVertices() const
 {
-    return std::count_if(this->vertices.begin(), this->vertices.end(),
-                         [](const TPGVertex* vertex) {
-                             return vertex->getIncomingEdges().size() == 0;
-                         });
+    return std::count_if(this->vertices.begin(), this->vertices.end(), 
+        [](const TPGVertex* vertex) {
+            return vertex->getIncomingEdges().size() == 0;
+        });
 }
 
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 {
     std::vector<const TPG::TPGVertex*> result;
     std::copy_if(this->vertices.begin(), this->vertices.end(),
-                 std::back_inserter(result), [](TPGVertex* vertex) {
-                     return vertex->getIncomingEdges().size() == 0;
-                 });
+        std::back_inserter(result), [](TPGVertex* vertex) {
+            return vertex->getIncomingEdges().size() == 0;
+        });
     return result;
 }
 
 bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
 {
-    return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) !=
-           this->vertices.cend();
+    return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) != this->vertices.cend();
 }
 
 void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)

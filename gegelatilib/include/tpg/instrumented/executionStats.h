@@ -82,11 +82,11 @@ namespace TPG {
      *  - create distributions from statistics of analyzed traces.
      *
      * Before analyzing or even starting any inference, you must :
-     *  - use a TPGGraph associated to a TPGInstrumentedFactory.
+     *  - use a TPGGraph associated to a TPGFactoryInstrumented.
      *  - use a TPGExecutionEngineInstrumented that will execute the TPGGraph.
      *  - clear any previous instrumented data :
      *      --> for the TPGGraph, use
-     * TPGInstrumentedFactory::resetTPGGraphCounters().
+     * TPGFactoryInstrumented::resetTPGGraphCounters().
      *      --> for the TPGExecutionEngineInstrumented, use its method
      * TPGExecutionEngineInstrumented::clearTraceHistory(). Otherwise, the
      * results won't have any meaning. If you have never executed the TPGGraph

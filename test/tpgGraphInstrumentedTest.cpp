@@ -45,7 +45,7 @@
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/tpgGraph.h"
 
@@ -98,9 +98,9 @@ TEST_F(TPGInstrumentedTest,
     ASSERT_NO_THROW(delete action);
 }
 
-TEST_F(TPGInstrumentedTest, TPGVertexInstrumentationSettersAndGetters)
+TEST_F(TPGInstrumentedTest, tpgVertexInstrumentedSettersAndGetters)
 {
-    // Test TPGVertexInstrumentation through its TPGTeamInstrumented
+    // Test tpgVertexInstrumented through its TPGTeamInstrumented
     // specialization.
     TPG::TPGTeamInstrumented team;
 
@@ -180,9 +180,9 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
            "be 0 after a reset.";
 }
 
-TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
+TEST_F(TPGInstrumentedTest, TPGFactoryInstrumented)
 {
-    TPG::TPGInstrumentedFactory factory;
+    TPG::TPGFactoryInstrumented factory;
 
     TPG::TPGAction* action;
     TPG::TPGTeam* team;
@@ -193,25 +193,25 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
         << "TPGFactory could not build a TPGAction.";
     ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
     ASSERT_EQ(typeid(*action), typeid(TPG::TPGActionInstrumented))
-        << "Action built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Action built by the TPGFactoryInstrumented has an incorrect type.";
 
     ASSERT_NO_THROW(team = factory.createTPGTeam())
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
     ASSERT_EQ(typeid(*team), typeid(TPG::TPGTeamInstrumented))
-        << "Team built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Team built by the TPGFactoryInstrumented has an incorrect type.";
 
     ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeInstrumented))
-        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Edge built by the TPGFactoryInstrumented has an incorrect type.";
 
     ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
         << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*tee), typeid(TPG::TPGExecutionEngineInstrumented))
-        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Edge built by the TPGFactoryInstrumented has an incorrect type.";
 
     delete team;
     delete action;
@@ -219,7 +219,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
 
 TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
 {
-    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGFactoryInstrumented>());
     const TPG::TPGTeam* t;
     const TPG::TPGAction* a;
     const TPG::TPGEdge* e;
@@ -227,22 +227,22 @@ TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
     ASSERT_NO_THROW(t = &tpg.addNewTeam())
         << "Adding a new Team to a TPGGraph failed.";
     ASSERT_EQ(typeid(*t), typeid(TPG::TPGTeamInstrumented))
-        << "Team built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Team built by the TPGFactoryInstrumented has an incorrect type.";
 
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a TPGGraph failed.";
     ASSERT_EQ(typeid(*a), typeid(TPG::TPGActionInstrumented))
-        << "Action built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Action built by the TPGFactoryInstrumented has an incorrect type.";
 
     ASSERT_NO_THROW(e = &tpg.addNewEdge(*t, *a, progPointer));
     ASSERT_EQ(typeid(*e), typeid(TPG::TPGEdgeInstrumented))
-        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
+        << "Edge built by the TPGFactoryInstrumented has an incorrect type.";
 }
 
-TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
+TEST_F(TPGInstrumentedTest, TPGFactoryInstrumentedReset)
 {
     // Add to the TPG
-    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGFactoryInstrumented>());
     const TPG::TPGTeamInstrumented& t =
         dynamic_cast<const TPG::TPGTeamInstrumented&>(tpg.addNewTeam());
     const TPG::TPGActionInstrumented& a =
@@ -265,7 +265,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
 
     // Do the reset
     ASSERT_NO_THROW(
-        dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
+        dynamic_cast<const TPG::TPGFactoryInstrumented&>(tpg.getFactory())
             .resetTPGGraphCounters(tpg));
 
     // Check result
@@ -275,7 +275,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     ASSERT_EQ(e.getNbTraversal(), 0);
 }
 
-TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
+TEST_F(TPGInstrumentedTest, TPGFactoryInstrumentedCleanTPG)
 {
     // Add to the TPG
 
@@ -294,7 +294,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
      *
      */
 
-    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGFactoryInstrumented>());
     const TPG::TPGTeamInstrumented* t[4];
     for (auto i = 0; i < 4; i++) {
         t[i] = dynamic_cast<const TPG::TPGTeamInstrumented*>(&tpg.addNewTeam());
@@ -353,7 +353,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
            "expected.";
 
     ASSERT_NO_THROW(
-        dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
+        dynamic_cast<const TPG::TPGFactoryInstrumented&>(tpg.getFactory())
             .clearUnusedTPGGraphElements(tpg));
 
     ASSERT_EQ(tpg.getNbVertices(), 5)

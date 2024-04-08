@@ -46,9 +46,9 @@
 
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "tpg/instrumented/tpgVertexInstrumented.h"
 #include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
 
@@ -601,7 +601,7 @@ TEST_F(LearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-// Same as previous, but with a TPGInstrumentedFactory
+// Same as previous, but with a TPGFactoryInstrumented
 TEST_F(LearningAgentTest, TrainInstrumented)
 {
     params.archiveSize = 50;
@@ -616,7 +616,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
-    Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
+    Learn::LearningAgent la(le, set, params, TPG::TPGFactoryInstrumented());
 
     la.init();
     bool alt = false;
@@ -656,11 +656,11 @@ TEST_F(LearningAgentTest, TrainInstrumented)
         106);
 
     auto& verticesIterator = tpg.getVertices();
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumented*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
               8488);
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumented*>(
                   verticesIterator.at(3))
                   ->getNbVisits(),
               2151);

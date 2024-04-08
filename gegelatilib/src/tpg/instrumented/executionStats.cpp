@@ -45,7 +45,7 @@
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "tpg/instrumented/tpgVertexInstrumented.h"
 
 void TPG::ExecutionStats::analyzeProgram(
     std::map<uint64_t, uint64_t>& instructionCounts,
