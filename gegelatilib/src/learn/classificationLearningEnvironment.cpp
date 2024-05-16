@@ -95,9 +95,7 @@ double Learn::ClassificationLearningEnvironment::getScore() const
 }
 
 void Learn::ClassificationLearningEnvironment::reset(size_t seed,
-                                                     LearningMode mode,
-                                                     uint16_t iterationNumber,
-                                                     uint64_t generationNumber)
+                                                     LearningMode mode)
 {
     // reset scores to 0 in classification table
     for (std::vector<uint64_t>& perClass : this->classificationTable) {

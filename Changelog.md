@@ -1,17 +1,10 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_2024.01.10_
-
-### New features
-
-### Changes
-* Add two parameters to the reset method of the learning environment. These parameters are used for environments that use specific initialization.
-  * Parameter `iterationNumber`: an integer indicating the current iteration number when the `nbIterationsPerPolicyEvaluation` parameter is greater than 1, default value = 0.
-  * Parameter `generationNumber`: an integer indicating the current generation number, default value = 0.
-
-### Bug fix
-
+## Release version 1.3.2
+_2024.05.16_
+## Changes 
+* LearningAgent constructor can take graph as param, used for calling Validation directly using a pre-trained graph
+* LearningAgent::evaluateJob uses rng.getUnsignedInt64() to draw random number instead of iterationNumber & generationNumber which creates multiple seed collisions during training and validation
 
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_

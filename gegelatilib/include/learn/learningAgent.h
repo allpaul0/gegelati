@@ -80,8 +80,7 @@ namespace Learn {
 
         /// Pointer to the best root encountered during training, together with
         /// its EvaluationResult.
-        std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-            bestRoot{nullptr, nullptr};
+        std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>> bestRoot{nullptr, nullptr};
 
         /**
          * \brief Map associating root TPG::TPGVertex to their EvaluationResult.
@@ -96,8 +95,7 @@ namespace Learn {
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
-        std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-            resultsPerRoot;
+        std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>> resultsPerRoot;
 
         /// Random Number Generator for this Learning Agent
         Mutator::RNG rng;
@@ -105,6 +103,11 @@ namespace Learn {
         /// Control the maximum number of threads when running in parallel.
         uint64_t maxNbThreads = 1;
 
+        /// double corresponding to the best score reached at the last
+        /// generation
+        double bestScoreLastGen = 0.0;
+
+      public:
         /**
          * \brief Set of LALogger called throughout the training process.
          *
@@ -114,11 +117,6 @@ namespace Learn {
          */
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
-        /// double corresponding to the best score reached at the last
-        /// generation
-        double bestScoreLastGen = 0.0;
-
-      public:
         /**
          * \brief Constructor for LearningAgent.
          *
@@ -137,6 +135,28 @@ namespace Learn {
             // override the number of actions from the parameters.
             this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
         };
+
+
+        /**
+         * \brief Constructor for LearningAgent.
+         *
+         * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] iSet Set of Instruction used to compose Programs in the
+         *            learning process.
+         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] tpgGraph The tpgGraph used, it contains a TPGFactory.
+         * \param[in] factory the factory used to enable the creation of elements 
+         *            composing a tpgGraph.
+         */
+        LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p,
+        std::shared_ptr<TPG::TPGGraph> tpgGraph, const TPG::TPGFactory& factory = TPG::TPGFactory())
+        : learningEnvironment{le}, env(iSet, le.getDataSources(), p.nbRegisters, p.nbProgramConstant),
+        tpg(tpgGraph), params{p}, archive(p.archiveSize, p.archivingProbability)
+        {
+            // override the number of actions from the parameters.
+            this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
+        };
+
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -212,7 +232,7 @@ namespace Learn {
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
-            LearningEnvironment& le) const;
+            LearningEnvironment& le);
 
         /**
          * \brief Method detecting whether a root should be evaluated again.
@@ -245,8 +265,7 @@ namespace Learn {
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              const TPG::TPGVertex*>
+        virtual std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -297,8 +316,7 @@ namespace Learn {
          * associated to their score during an evaluation.
          */
         virtual void decimateWorstRoots(
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
+            std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results);
 
         /**
          * \brief Train the TPGGraph for a given number of generation.

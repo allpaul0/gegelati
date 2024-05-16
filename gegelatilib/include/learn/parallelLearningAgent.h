@@ -187,6 +187,27 @@ namespace Learn {
         };
 
         /**
+         * \brief Constructor for ParallelLearningAgent.
+         *
+         * Based on default constructor of LearningAgent
+         *
+         * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] iSet Set of Instruction used to compose Programs in the
+         *            learning process.
+         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] tpgGraph The tpgGraph used, it contains a TPGFactory.
+         */
+        ParallelLearningAgent(
+            LearningEnvironment& le, const Instructions::Set& iSet,
+            const LearningParameters& p,
+            std::shared_ptr<TPG::TPGGraph> tpgGraph)
+            : LearningAgent(le, iSet, p, tpgGraph, tpgGraph->getFactory())
+        {
+            // overriding the maxNbThreads that basic LA defined to 1
+            maxNbThreads = p.nbThreads;
+        };
+
+        /**
          * \brief Evaluate all root TPGVertex of the TPGGraph.
          *
          * **Replaces the function from the base class LearningAgent.**

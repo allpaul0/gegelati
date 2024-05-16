@@ -125,7 +125,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
 std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
     evaluateJob(TPG::TPGExecutionEngine& tee, const Job& job,
                 uint64_t generationNumber, Learn::LearningMode mode,
-                LearningEnvironment& le) const
+                LearningEnvironment& le) 
 {
     auto& ale = (AdversarialLearningEnvironment&)le;
 

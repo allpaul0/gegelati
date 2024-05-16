@@ -80,8 +80,7 @@ void Mutator::TPGMutator::initRandomTPG(
     for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
         programs.emplace_back(new Program::Program(graph.getEnvironment()));
         // RandomInit the Programs
-        Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
-                                                   rng);
+        Mutator::ProgramMutator::initRandomProgram(*programs.back(), params, rng);
     }
 
     // Connect each team with two distinct actions, through two distinct
@@ -89,10 +88,7 @@ void Mutator::TPGMutator::initRandomTPG(
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
     for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
-        graph.addNewEdge(
-            *teams.at(i / 2),
-            *actions.at(((i / 2) + (i % 2)) % params.tpg.nbActions),
-            programs.at(i));
+        graph.addNewEdge(*teams.at(i / 2), *actions.at(((i / 2) + (i % 2)) % params.tpg.nbActions), programs.at(i));
     }
 
     // Add additional connections to TPG
@@ -377,18 +373,15 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     else {
         // Parallel
         // Create job list with Program pointers and seed
-        std::queue<std::pair<std::shared_ptr<Program::Program>, uint64_t>>
-            programsToMutate;
+        std::queue<std::pair<std::shared_ptr<Program::Program>, uint64_t>> programsToMutate;
         for (std::shared_ptr<Program::Program> newProg : newPrograms) {
-            programsToMutate.push(
-                {newProg, rng.getUnsignedInt64(0, UINT64_MAX)});
+            programsToMutate.push({newProg, rng.getUnsignedInt64(0, UINT64_MAX)});
         }
 
         std::mutex mutexMutation;
 
         // Function executed in threads
-        auto parallelWorker = [&programsToMutate, &mutexMutation, &params,
-                               &archive]() {
+        auto parallelWorker = [&programsToMutate, &mutexMutation, &params, &archive]() {
             Mutator::RNG privateRNG;
             // While there is work to be done
             bool jobDone;
@@ -407,8 +400,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
                 //  Do the job (if any)
                 if (jobDone) {
                     privateRNG.setSeed(job.second);
-                    mutateProgramBehaviorAgainstArchive(job.first, params,
-                                                        archive, privateRNG);
+                    mutateProgramBehaviorAgainstArchive(job.first, params, archive, privateRNG);
                 }
             } while (jobDone);
         };

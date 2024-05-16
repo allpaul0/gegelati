@@ -104,7 +104,7 @@ namespace Learn {
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& root,
             uint64_t generationNumber, LearningMode mode,
-            LearningEnvironment& le) const override;
+            LearningEnvironment& le) override;
 
         /**
          * \brief Specialization of the decimateWorstRoots method for
@@ -144,7 +144,7 @@ namespace Learn {
                                         const Job& job,
                                         uint64_t generationNumber,
                                         LearningMode mode,
-                                        LearningEnvironment& le) const
+                                        LearningEnvironment& le) 
     {
         // Only consider the first root of jobs as we are not in adversarial
         // mode

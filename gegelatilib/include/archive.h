@@ -103,9 +103,7 @@ class Archive
      * recordings to associate each recording to the right copy of the
      * DataHandler.
      */
-    std::map<size_t,
-             std::vector<std::reference_wrapper<const Data::DataHandler>>>
-        dataHandlers;
+    std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> dataHandlers;
 
     /**
      * \brief Map storing the Program pointers referenced in recordings the
@@ -117,8 +115,7 @@ class Archive
      *
      * The Map is used to speed the unicity tests.
      */
-    std::map<const Program::Program*, std::deque<ArchiveRecording>>
-        recordingsPerProgram;
+    std::map<const Program::Program*, std::deque<ArchiveRecording>> recordingsPerProgram;
 
     /// Recordings of the Archive
     std::deque<ArchiveRecording> recordings;
@@ -166,9 +163,7 @@ class Archive
      *
      * \return the hash resulting from the combination.
      */
-    static size_t getCombinedHash(
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandler);
+    static size_t getCombinedHash(const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler);
 
     /**
      * \brief Access the nth ArchiveRecording within the Archive.

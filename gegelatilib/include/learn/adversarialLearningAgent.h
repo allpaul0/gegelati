@@ -197,7 +197,7 @@ namespace Learn {
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
-            LearningEnvironment& le) const override;
+            LearningEnvironment& le) override; 
 
         /**
          * \brief Puts all roots into AdversarialJob to be able to use them in

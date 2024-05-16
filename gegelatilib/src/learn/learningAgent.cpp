@@ -107,12 +107,13 @@ bool Learn::LearningAgent::isRootEvalSkipped(
     }
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
+std::shared_ptr<Learn::EvaluationResult> 
+Learn::LearningAgent::evaluateJob(
     TPG::TPGExecutionEngine& tee, 
     const Job& job, 
     uint64_t generationNumber,
     Learn::LearningMode mode, 
-    LearningEnvironment& le) const
+    LearningEnvironment& le)
 {
     // Only consider the first root of jobs as we are not in adversarial mode
     const TPG::TPGVertex* root = job.getRoot();
@@ -129,12 +130,12 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
-        // Compute a Hash
-        Data::Hash<uint64_t> hasher;
-        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+
+        // retrieve a seed from the rng
+        uint64_t seed = this->rng.getUnsignedInt64(0, UINT64_MAX);
 
         // Reset the learning Environment
-        le.reset(hash, mode, iterationNumber, generationNumber);
+        le.reset(seed, mode);
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
@@ -174,10 +175,14 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::Learnin
 
     auto roots = tpg->getRootVertices();
     for (int i = 0; i < roots.size(); i++) {
+        
         auto job = makeJob(roots.at(i), mode);
+
+        // Set a new seed for the randomEngine of the archive
         this->archive.setRandomSeed(job->getArchiveSeed());
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob( 
-            *tee, *job, generationNumber, mode, this->learningEnvironment);
+
+        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(*tee, *job, generationNumber, mode, this->learningEnvironment);
+        
         result.emplace(avgScore, (*job).getRoot());
     }
 
@@ -190,25 +195,24 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneRoot(
 {
     // Retrieve the index of the root TPGVertex
     const std::vector<const TPG::TPGVertex*> vertices = tpg->getVertices();
-    std::vector<const TPG::TPGVertex*>::const_iterator iterator =
-        std::find(vertices.begin(), vertices.end(), root);
+    std::vector<const TPG::TPGVertex*>::const_iterator iterator = std::find(vertices.begin(), vertices.end(), root);
+
     if (iterator == vertices.end()) {
-        throw std::runtime_error("The vertex to evaluate does not exist in the "
-                                 "TPGGraph of the LearningAgent.");
+        throw std::runtime_error("The vertex to evaluate does not exist in the TPGGraph of the LearningAgent.");
     }
 
     // Create the TPGExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
-        this->tpg->getFactory().createTPGExecutionEngine(
-            this->env,
-            (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+        this->tpg->getFactory().createTPGExecutionEngine(this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
     // Create and evaluate the job
     auto job = makeJob(*iterator, mode);
+
+    //  Set a new seed for the randomEngine.
     this->archive.setRandomSeed(job->getArchiveSeed());
-    std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-        *tee, *job, generationNumber, mode, this->learningEnvironment);
+
+    std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(*tee, *job, generationNumber, mode, this->learningEnvironment);
 
     // Return the result
     return avgScore;
@@ -324,8 +328,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
             printf("\nTraining completed\n");
         }
         else {
-            printf("\nTraining alted at generation %" PRIu64 ".\n",
-                   generationNumber);
+            printf("\nTraining alted at generation %" PRIu64 ".\n", generationNumber);
         }
     }
     return generationNumber;
@@ -430,9 +433,9 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
     }
 
     if (tpgGraph->getNbRootVertices() > 0) {
-        return std::make_shared<Learn::Job>(
-            Learn::Job({vertex}, archiveSeed, idx));
+        return std::make_shared<Learn::Job>(Learn::Job({vertex}, archiveSeed, idx));
     }
+
     return nullptr;
 }
 
