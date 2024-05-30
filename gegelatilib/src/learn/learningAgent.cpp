@@ -130,12 +130,19 @@ Learn::LearningAgent::evaluateJob(
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
-
-        // retrieve a seed from the rng
-        uint64_t seed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-
+     
+        Data::Hash<uint64_t> hasher;
+        // If this is a VALIDATION process, make sure the hash used does not overlap 
+        // hashes used during TRAINING, left shift is used to avoid hash collisions.
+        // This is a customed way to avoid overlapping of TRAINING set (hashes)
+        // and VALIDATION set (hashes).
+        if(mode == LearningMode::VALIDATION) {
+            iterationNumber <<= 8; 
+        }
+        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+        
         // Reset the learning Environment
-        le.reset(seed, mode);
+        le.reset(hash, mode);
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
@@ -149,6 +156,7 @@ Learn::LearningAgent::evaluateJob(
 
         // Update results
         result += le.getScore();
+        //std::cout << "score: " << le.getScore() << std::endl;
     }
 
     // Create the EvaluationResult
@@ -260,6 +268,8 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
         logger.get().logEndOfTraining();
     }
 }
+
+
 
 void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, 
