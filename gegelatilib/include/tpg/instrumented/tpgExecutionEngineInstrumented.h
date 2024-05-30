@@ -53,9 +53,9 @@ namespace TPG {
     class TPGExecutionEngineInstrumented : public TPGExecutionEngine
     {
       protected:
-        /// History of all previous execution traces. New traces are pushed
+        /// History of all previous execution traces. New inference traces are pushed
         /// back.
-        std::vector<std::vector<const TPGVertex*>> traceHistory;
+        std::vector<std::vector<const TPGVertex*>> inferenceTraceHistory;
 
       public:
         /**
@@ -68,8 +68,7 @@ namespace TPG {
          *                 given, meaning that no recording of the execution
          *                 will be made.
          */
-        TPGExecutionEngineInstrumented(const Environment& env,
-                                       Archive* arch = NULL)
+        TPGExecutionEngineInstrumented(const Environment& env, Archive* arch = NULL)
             : TPGExecutionEngine(env, arch){};
 
         /**
@@ -97,15 +96,13 @@ namespace TPG {
          * TPGExecutionEngine, this specialization increments the number of
          * visits of the reached TPGAction.
          */
-        const std::vector<const TPGVertex*> executeFromRoot(
-            const TPGVertex& root) override;
+        const std::vector<const TPGVertex*> executeFromRoot(const TPGVertex& root) override;
 
-        /// Get all previous execution traces.
-        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()
-            const;
+        /// Get all previous inference traces.
+        const std::vector<std::vector<const TPGVertex*>>& getInferenceTraceHistory() const;
 
-        /// Clear the trace history from all previous execution trace.
-        void clearTraceHistory();
+        /// Clear the trace history from all previous inference trace.
+        void clearInferenceTraceHistory();
     };
 }; // namespace TPG
 

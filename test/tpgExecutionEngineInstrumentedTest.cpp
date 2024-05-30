@@ -273,19 +273,19 @@ TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
     TPG::TPGExecutionEngineInstrumented tpeei(*e);
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
     result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
     result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
 
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 2)
         << "Wrong number of recorded traces.";
-    ASSERT_EQ(result, tpeei.getTraceHistory().at(0))
+    ASSERT_EQ(result, tpeei.getInferenceTraceHistory().at(0))
         << "Recorded trace is different from result trace.";
 
-    ASSERT_NO_THROW(tpeei.clearTraceHistory())
+    ASSERT_NO_THROW(tpeei.clearInferenceTraceHistory())
         << "Clearing trace history failed unexpectedly.";
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 0)
         << "Trace history isn't empty after clear.";
 }

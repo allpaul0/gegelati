@@ -61,13 +61,12 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
 {
     this->avgNbExecutionPerInstruction.clear();
 
-    const auto roots = graph->getRootVertices();
-    uint64_t nbInferences = std::accumulate(
-        roots.cbegin(), roots.cend(), (uint64_t)0,
+    const std::vector<const TPG::TPGVertex *> roots = graph->getRootVertices();
+    uint64_t nbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0,
         [](uint64_t accu, const TPGVertex* vertex) {
-            const auto& rootTeam =
-                dynamic_cast<const TPGTeamInstrumented&>(*vertex);
             // Raise std::bad_cast if not an instrumented team
+            const TPG::TPGTeamInstrumented& rootTeam = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
+            
             return accu + rootTeam.getNbVisits();
         });
 
@@ -76,26 +75,26 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
     uint64_t nbExecutedLines = 0;
     std::map<size_t, uint64_t> totalExecutionsPerInstruction;
 
-    auto vertices = graph->getVertices();
+    const std::vector<const TPG::TPGVertex *> vertices = graph->getVertices();
 
-    for (auto vertex : vertices) {
+    for (const TPG::TPGVertex* vertex : vertices) {
 
         // Skip non-team instrumented vertices
-        if (dynamic_cast<const TPGActionInstrumented*>(vertex))
+        if (dynamic_cast<const TPGActionInstrumented*>(vertex)) 
             continue;
 
-        auto& team = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
         // Raise std::bad_cast if not an instrumented team
+        const TPG::TPGTeamInstrumented* team = dynamic_cast<const TPGTeamInstrumented*>(vertex);
 
-        nbEvaluatedTeams += team.getNbVisits();
+        nbEvaluatedTeams += team->getNbVisits();
 
-        for (const auto* edge : team.getOutgoingEdges()) {
+        for (const TPG::TPGEdge *edge : team->getOutgoingEdges()) {
 
-            auto& instruEdge = dynamic_cast<const TPGEdgeInstrumented&>(*edge);
             // Raise std::bad_cast if not an instrumented edge
+            const TPGEdgeInstrumented& tpgEdgeInstrumented = dynamic_cast<const TPGEdgeInstrumented&>(*edge);
 
-            uint64_t nbEdgeEval = instruEdge.getNbVisits();
-            Program::Program& edgeProgram = instruEdge.getProgram();
+            uint64_t nbEdgeEval = tpgEdgeInstrumented.getNbVisits();
+            const Program::Program& edgeProgram = tpgEdgeInstrumented.getProgram();
 
             // Evaluated edge => edge program executed
             if (nbEdgeEval > 0) {
@@ -104,66 +103,70 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
 
                 std::map<uint64_t, uint64_t> linesPerInstruction;
                 analyzeProgram(linesPerInstruction, edgeProgram);
-                for (const auto& pair : linesPerInstruction) {
-                    totalExecutionsPerInstruction[pair.first] +=
-                        nbEdgeEval * pair.second;
+                for (const std::pair<const size_t, const size_t>& pair : linesPerInstruction) {
+                    totalExecutionsPerInstruction[pair.first] += nbEdgeEval * pair.second;
                 }
             }
         }
     }
 
     this->avgEvaluatedTeams = (double)nbEvaluatedTeams / (double)nbInferences;
-    this->avgEvaluatedPrograms =
-        (double)nbEvaluatedPrograms / (double)nbInferences;
+    this->avgEvaluatedPrograms = (double)nbEvaluatedPrograms / (double)nbInferences;
     this->avgExecutedLines = (double)nbExecutedLines / (double)nbInferences;
 
     for (const auto& p : totalExecutionsPerInstruction) {
-        avgNbExecutionPerInstruction[p.first] =
-            (double)p.second / (double)nbInferences;
+        avgNbExecutionPerInstruction[p.first] = (double)p.second / (double)nbInferences;
     }
 }
 
-void TPG::ExecutionStats::analyzeInferenceTrace(
-    const std::vector<const TPGVertex*>& trace)
+void TPG::ExecutionStats::analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace)
 {
-    uint64_t nbEvaluatedTeams = trace.size() - 1;
-    // Remove the action vertex at the end
-
+    // Do not count the action vertex at the end
+    uint64_t nbEvaluatedTeams = inferenceTrace.size() - 1;
     uint64_t nbEvaluatedPrograms = 0;
     uint64_t nbExecutedLines = 0;
     std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
 
-    // For of each visited teams, analysing its edges
-    for (auto it = trace.begin(); it != trace.end() - 1; it++) {
-        for (auto edge : (*it)->getOutgoingEdges()) {
+    std::cout << "Traces" << std::endl;
 
-            // Edges leading to a previously visited teams (including the
-            // current team) are not evaluated
-            auto endSearchIt = it + 1;
-            if (std::find(trace.begin(), endSearchIt, edge->getDestination()) !=
-                endSearchIt)
+    for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamsIterator = inferenceTrace.cbegin(); inferenceTraceTeamsIterator != inferenceTrace.cend() - 1; inferenceTraceTeamsIterator++) {
+        std::cout << *inferenceTraceTeamsIterator << std::endl;
+    }
+    
+    std::cout << std::endl;
+
+    // For of each visited teams, analysing its edges
+    for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamsIterator = inferenceTrace.cbegin(); inferenceTraceTeamsIterator != inferenceTrace.cend() - 1; inferenceTraceTeamsIterator++) {
+        for (const TPG::TPGEdge* edge : (*inferenceTraceTeamsIterator)->getOutgoingEdges()) {
+
+            std::cout << "edge->getDestination(): " << edge->getDestination() << std::endl;
+                 
+            // Edges leading to a previously visited teams (including the current team) are not evaluated
+            auto endSearchIt = inferenceTraceTeamsIterator + 1;
+
+            std::cout << *std::find(inferenceTrace.begin(), endSearchIt, edge->getDestination()) << std::endl;
+
+            if (std::find(inferenceTrace.begin(), endSearchIt, edge->getDestination()) != endSearchIt)
                 continue;
 
             nbEvaluatedPrograms++;
             nbExecutedLines += edge->getProgram().getNbLines();
-
             analyzeProgram(nbExecutionPerInstruction, edge->getProgram());
         }
     }
 
-    this->inferenceTracesStats.push_back({trace, nbEvaluatedTeams,
-                                          nbEvaluatedPrograms, nbExecutedLines,
-                                          nbExecutionPerInstruction});
+    this->inferenceTracesStats.push_back({inferenceTrace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
 
     // Update distributions
-
-    this->distribEvaluatedTeams[nbEvaluatedTeams]++;
-    this->distribEvaluatedPrograms[nbEvaluatedPrograms]++;
-    this->distribExecutedLines[nbExecutedLines]++;
-    for (const auto& p : nbExecutionPerInstruction)
+    this->distribNbEvaluatedTeams[nbEvaluatedTeams]++;
+    this->distribNbEvaluatedPrograms[nbEvaluatedPrograms]++;
+    this->distribNbExecutedLines[nbExecutedLines]++;
+    for (const std::pair<const size_t, const size_t>& p : nbExecutionPerInstruction) {
         this->distribNbExecutionPerInstruction[p.first][p.second]++;
-    for (auto vertex : trace)
-        this->distribUsedVertices[vertex]++;
+    }
+    for (const TPG::TPGVertex* inferenceTraceVertex : inferenceTrace) {
+        this->distribNbUsedVertices[inferenceTraceVertex]++;
+    }
 }
 
 void TPG::ExecutionStats::analyzeExecution(
@@ -174,8 +177,9 @@ void TPG::ExecutionStats::analyzeExecution(
 
     analyzeInstrumentedGraph(graph);
 
-    for (const auto& trace : tee.getTraceHistory())
-        analyzeInferenceTrace(trace);
+    for (const auto& inferenceTrace : tee.getInferenceTraceHistory()) {
+        analyzeInferenceTrace(inferenceTrace);
+    }
 }
 
 double TPG::ExecutionStats::getAvgEvaluatedTeams() const
@@ -196,26 +200,23 @@ const std::map<size_t, double>& TPG::ExecutionStats::
     return this->avgNbExecutionPerInstruction;
 }
 
-const std::vector<TPG::TraceStats>& TPG::ExecutionStats::
-    getInferenceTracesStats() const
+const std::vector<TPG::InferenceTraceStats>& TPG::ExecutionStats::getInferenceTracesStats() const
 {
     return this->inferenceTracesStats;
 }
 
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedTeams()
-    const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedTeams() const
 {
-    return this->distribEvaluatedTeams;
+    return this->distribNbEvaluatedTeams;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::
-    getDistribEvaluatedPrograms() const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedPrograms() const
 {
-    return this->distribEvaluatedPrograms;
+    return this->distribNbEvaluatedPrograms;
 }
 const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines()
     const
 {
-    return this->distribExecutedLines;
+    return this->distribNbExecutedLines;
 }
 const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::
     getDistribNbExecutionPerInstruction() const
@@ -225,28 +226,27 @@ const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::
 const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::
     getDistribUsedVertices() const
 {
-    return this->distribUsedVertices;
+    return this->distribNbUsedVertices;
 }
 
 void TPG::ExecutionStats::clearInferenceTracesStats()
 {
     this->inferenceTracesStats.clear();
-
-    this->distribEvaluatedTeams.clear();
-    this->distribEvaluatedPrograms.clear();
-    this->distribExecutedLines.clear();
+    this->distribNbEvaluatedTeams.clear();
+    this->distribNbEvaluatedPrograms.clear();
+    this->distribNbExecutedLines.clear();
     this->distribNbExecutionPerInstruction.clear();
-    this->distribUsedVertices.clear();
+    this->distribNbUsedVertices.clear();
 }
 
-void TPG::ExecutionStats::writeStatsToJson(const char* filePath,
-                                           bool noIndent) const
+void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) const
 {
     std::map<const TPGVertex*, unsigned int> vertexIndexes;
     if (this->lastAnalyzedGraph != nullptr) {
+        
         // Store the index of each vertex in the TPGGraph in a lookup table
-        // to print the execution traces.
-        auto graphVertices = this->lastAnalyzedGraph->getVertices();
+        // to print the inference traces.
+        const std::vector<const TPG::TPGVertex *> graphVertices = this->lastAnalyzedGraph->getVertices();
         for (int i = 0; i < graphVertices.size(); i++) {
             vertexIndexes[graphVertices[i]] = i;
         }
@@ -262,56 +262,44 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath,
     root["ExecutionStats"]["avgExecutedLines"] = this->avgExecutedLines;
 
     for (const auto& p : this->avgNbExecutionPerInstruction)
-        root["ExecutionStats"]["avgNbExecutionPerInstruction"]
-            [std::to_string(p.first)] = p.second;
+        root["ExecutionStats"]["avgNbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
 
     // Distributions
-    for (const auto& p : this->distribEvaluatedTeams)
-        root["ExecutionStats"]["distributionEvaluatedTeams"]
-            [std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbEvaluatedTeams)
+        root["ExecutionStats"]["distributionNbEvaluatedTeams"][std::to_string(p.first)] = p.second;
 
-    for (const auto& p : this->distribEvaluatedPrograms)
-        root["ExecutionStats"]["distributionEvaluatedPrograms"]
-            [std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbEvaluatedPrograms)
+        root["ExecutionStats"]["distributionNbEvaluatedPrograms"][std::to_string(p.first)] = p.second;
 
-    for (const auto& p : this->distribExecutedLines)
-        root["ExecutionStats"]["distributionExecutedLines"]
-            [std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbExecutedLines)
+        root["ExecutionStats"]["distributionNbExecutedLines"][std::to_string(p.first)] = p.second;
 
     for (const auto& p1 : this->distribNbExecutionPerInstruction) {
         for (const auto& p2 : p1.second)
-            root["ExecutionStats"]["distributionNbExecutionPerInstruction"]
-                [std::to_string(p1.first)][std::to_string(p2.first)] =
-                    p2.second;
+            root["ExecutionStats"]["distributionNbExecutionPerInstruction"][std::to_string(p1.first)][std::to_string(p2.first)] = p2.second;
     }
 
-    for (const auto& p : this->distribUsedVertices) {
+    for (const auto& p : this->distribNbUsedVertices) {
         size_t idxVertex = vertexIndexes[p.first];
-        root["ExecutionStats"]["distributionUsedVertices"]
-            [std::to_string(idxVertex)] = p.second;
+        root["ExecutionStats"]["distributionNbUsedVertices"][std::to_string(idxVertex)] = p.second;
     }
 
     // Trace statistics
     int i = 0;
-    for (auto& stats : this->getInferenceTracesStats()) {
+    for (TPG::InferenceTraceStats inferenceTraceStats: this->getInferenceTracesStats()) {
         std::string nbTrace = std::to_string(i);
 
         if (this->lastAnalyzedGraph != nullptr) {
-            for (int j = 0; j < stats.trace.size(); j++) {
-                root["TracesStats"][nbTrace]["trace"][j] =
-                    vertexIndexes[stats.trace[j]];
+            for (int j = 0; j < inferenceTraceStats.inferenceTrace.size(); j++) {
+                root["TracesStats"][nbTrace]["trace"][j] = vertexIndexes[inferenceTraceStats.inferenceTrace[j]];
             }
         }
 
-        root["TracesStats"][nbTrace]["nbEvaluatedTeams"] =
-            stats.nbEvaluatedTeams;
-        root["TracesStats"][nbTrace]["nbEvaluatedPrograms"] =
-            stats.nbEvaluatedPrograms;
-        root["TracesStats"][nbTrace]["nbExecutedLines"] = stats.nbExecutedLines;
-        for (const auto& p : stats.nbExecutionPerInstruction)
-            root["TracesStats"][nbTrace]["nbExecutionPerInstruction"]
-                [std::to_string(p.first)] = p.second;
-
+        root["TracesStats"][nbTrace]["nbEvaluatedTeams"] = inferenceTraceStats.nbEvaluatedTeams;
+        root["TracesStats"][nbTrace]["nbEvaluatedPrograms"] = inferenceTraceStats.nbEvaluatedPrograms;
+        root["TracesStats"][nbTrace]["nbExecutedLines"] = inferenceTraceStats.nbExecutedLines;
+        for (const auto& p : inferenceTraceStats.nbExecutionPerInstruction)
+            root["TracesStats"][nbTrace]["nbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
         i++;
     }
 

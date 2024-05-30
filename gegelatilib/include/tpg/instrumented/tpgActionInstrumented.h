@@ -44,8 +44,7 @@ namespace TPG {
     /**
      * \brief Instrumented TPGAction
      */
-    class TPGActionInstrumented : public TPG::TPGAction,
-                                  public TPG::TPGVertexInstrumented
+    class TPGActionInstrumented : public TPG::TPGAction, public TPG::TPGVertexInstrumented
     {
       public:
         /// Main constructor for TPGActionInstrumented.

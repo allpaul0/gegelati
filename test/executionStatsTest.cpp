@@ -314,27 +314,27 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 1)
         << "Attribute executionTraceStats doesn't have just the analyzed trace "
            "statistics.";
-    ASSERT_EQ(executionStats.getInferenceTracesStats()[0].trace,
+    ASSERT_EQ(executionStats.getInferenceTracesStats()[0].inferenceTrace,
               inferenceTraces[2])
         << "Wrong analyzed execution trace in executionStats.";
 
-    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[0];
+    const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[0];
 
-    ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(stats.nbExecutedLines, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */
@@ -437,23 +437,23 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
     ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 6.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
 
-    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[2];
+    const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[2];
 
-    ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(stats.nbExecutedLines, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */
@@ -499,10 +499,10 @@ TEST_F(ExecutionStatsTest, WriteStatsToJson)
     TPG::ExecutionStats executionStats;
     executionStats.analyzeExecution(*execEngine, tpg);
 
-    ASSERT_NO_THROW(executionStats.writeStatsToJson("execution_stats.json"))
+    ASSERT_NO_THROW(executionStats.writeStatsToJson("execution_inferenceTraceStats.json"))
         << "Exporting execution statistics to file failed unexpectedly.";
 
-    ASSERT_TRUE(compare_files("execution_stats.json",
-                              TESTS_DAT_PATH "execution_stats_ref.json"))
+    ASSERT_TRUE(compare_files("execution_inferenceTraceStats.json",
+                              TESTS_DAT_PATH "execution_inferenceTraceStats_ref.json"))
         << "Generated json file is different from the reference file.";
 }

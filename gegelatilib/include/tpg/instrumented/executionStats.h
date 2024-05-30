@@ -43,21 +43,27 @@
 
 namespace TPG {
 
+    // inference trace is a keyword for visited vertices from one inference.
+    // As the inference of a TPG varies according to its execution context,
+    // inference traces are the history of the execution path of a TPG from
+    // the starting root/Team, passing by every visited vertices/Team to the terminal 
+    // leaf/action. 
+
     /**
      * \brief Store execution statistics of one inference trace.
      *
      * It contains :
-     * - the execution trace in a std::vector<const TPG::TPGVertex*>
+     * - the inference trace in a std::vector<const TPG::TPGVertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
      * - the number of executed lines
      * - the number of execution for each instructions (indexed by instruction
      * index)
      */
-    struct TraceStats
+    struct InferenceTraceStats
     {
         /// The inference trace.
-        const std::vector<const TPG::TPGVertex*> trace;
+        const std::vector<const TPG::TPGVertex*> inferenceTrace;
 
         /// Number of team evaluated.
         const uint64_t nbEvaluatedTeams;
@@ -79,7 +85,7 @@ namespace TPG {
      *  average execution statistics.
      *  - compute execution statistics for every inference done with a
      * TPGExecutionEngineInstrumented.
-     *  - create distributions from statistics of analyzed traces.
+     *  - create distributions from statistics of analyzed inference traces.
      *
      * Before analyzing or even starting any inference, you must :
      *  - use a TPGGraph associated to a TPGFactoryInstrumented.
@@ -88,7 +94,7 @@ namespace TPG {
      *      --> for the TPGGraph, use
      * TPGFactoryInstrumented::resetTPGGraphCounters().
      *      --> for the TPGExecutionEngineInstrumented, use its method
-     * TPGExecutionEngineInstrumented::clearTraceHistory(). Otherwise, the
+     * TPGExecutionEngineInstrumented::clearInferenceTraceHistory(). Otherwise, the
      * results won't have any meaning. If you have never executed the TPGGraph
      * or the TPGExecutionEngineInstrumented, resetting them isn't required.
      *
@@ -129,56 +135,55 @@ namespace TPG {
          */
         std::map<size_t, double> avgNbExecutionPerInstruction;
 
-        /* Analyzed Traces */
+        /* Analyzed inference traces */
 
-        /// Statistics of last analyzed traces.
-        std::vector<TraceStats> inferenceTracesStats;
+        /// Statistics of last analyzed inference traces.
+        std::vector<InferenceTraceStats> inferenceTracesStats;
 
         /* Distributions */
 
         /**
          * \brief Distribution of the number of evaluated team per inference for
-         * all analyzed traces.
+         * all analyzed inference traces.
          *
-         * distribEvaluatedTeams[x] = y --> y inferences evaluated x teams.
+         * distribNbEvaluatedTeams[x] = y --> y inferences evaluated x teams.
          */
-        std::map<size_t, size_t> distribEvaluatedTeams;
+        std::map<size_t, size_t> distribNbEvaluatedTeams;
 
         /**
          * \brief Distribution of the number of evaluated programs per inference
-         * for all analyzed traces.
+         * for all analyzed inference traces.
          *
-         * distribEvaluatedPrograms[x] = y --> y inferences evaluated x
+         * distribNbEvaluatedPrograms[x] = y --> y inferences evaluated x
          * programs.
          */
-        std::map<size_t, size_t> distribEvaluatedPrograms;
+        std::map<size_t, size_t> distribNbEvaluatedPrograms;
 
         /**
          * \brief Distribution of the number of executed lines per inference for
-         * all analyzed traces.
+         * all analyzed inference traces.
          *
-         * distribExecutedLines[x] = y --> y inferences executed x lines.
+         * distribNbExecutedLines[x] = y --> y inferences executed x lines.
          */
-        std::map<size_t, size_t> distribExecutedLines;
+        std::map<size_t, size_t> distribNbExecutedLines;
 
         /**
          * \brief Distributions of the number of executions of each instruction
-         * per inference for all analyzed traces.
+         * per inference for all analyzed inference traces.
          *
          * distribNbExecutionPerInstruction[i][x] = y --> for instruction at
          * index i, y inferences executed this instruction x times.
          */
-        std::map<size_t, std::map<size_t, size_t>>
-            distribNbExecutionPerInstruction;
+        std::map<size_t, std::map<size_t, size_t>> distribNbExecutionPerInstruction;
 
         /**
          * \brief Distribution of the number of visit each vertex had for all
-         * analyzed traces.
+         * analyzed inference traces.
          *
-         * distribUsedVertices[v] = y --> y inferences visited vertex pointed by
+         * distribNbUsedVertices[v] = y --> y inferences visited vertex pointed by
          * v.
          */
-        std::map<const TPG::TPGVertex*, size_t> distribUsedVertices;
+        std::map<const TPG::TPGVertex*, size_t> distribNbUsedVertices;
 
         /// Graph used during last call to analyzeExecution
         const TPGGraph* lastAnalyzedGraph = nullptr;
@@ -218,17 +223,17 @@ namespace TPG {
         /**
          * \brief Analyze the execution statistics of one inference trace.
          *
-         * The vector trace contains all visited vertices for one inference
-         * in order : trace[0] is the root, and trace[trace.size()-1] the
+         * The vector inferenceTrace contains all visited vertices for one inference
+         * in order : inferenceTrace[0] is the root, and inferenceTrace[inferenceTrace.size()-1] the
          * action.
          *
-         * Results are stored in a new TraceStats struct which is pushed back
+         * Results are stored in a new inferenceTraceStats struct which is pushed back
          * in attribute inferenceTracesStats. Previous results will be erased.
          *
-         * \param[in] trace a vector<const TPGVertex*> of the analyzed inference
+         * \param[in] inferenceTrace a vector<const TPGVertex*> of the analyzed inference
          * trace.
          */
-        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& trace);
+        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace);
 
         /**
          * \brief Analyze the execution statistics of multiple inferences
@@ -257,8 +262,8 @@ namespace TPG {
         /// its average number of execution per inference.
         const std::map<size_t, double>& getAvgNbExecutionPerInstruction() const;
 
-        /// Get stored trace statistics.
-        const std::vector<TraceStats>& getInferenceTracesStats() const;
+        /// Get stored inferenceTrace statistics.
+        const std::vector<InferenceTraceStats>& getInferenceTracesStats() const;
 
         /// Get the distribution of the number of evaluated teams.
         const std::map<size_t, size_t>& getDistribEvaluatedTeams() const;
@@ -274,10 +279,9 @@ namespace TPG {
         getDistribNbExecutionPerInstruction() const;
 
         /// Get the distribution if the number of visit for each vertex.
-        const std::map<const TPG::TPGVertex*, size_t>& getDistribUsedVertices()
-            const;
+        const std::map<const TPG::TPGVertex*, size_t>& getDistribUsedVertices() const;
 
-        /// Clear stored trace statistics and distributions.
+        /// Clear stored inferneceTrace statistics and distributions.
         void clearInferenceTracesStats();
 
         /**
@@ -336,9 +340,9 @@ namespace TPG {
          *              }
          *          },
          *
-         *          "TracesStats" :
+         *          "inferenceTracesStats" :
          *          {
-         *              "TraceNumber" :
+         *              "inferenceTraceNumber" :
          *              {
          *                  "nbEvaluatedPrograms" : value,
          *                  "nbEvaluatedTeams" : value,
@@ -348,7 +352,7 @@ namespace TPG {
          *                      "InstructionIndex" : nbExecution,
          *                  ...
          *                  },
-         *                  "trace" : [Array of vertex indexes in the TPGGraph]
+         *                  "inferenceTrace" : [Array of vertices indexes in the TPGGraph]
          *              },
          *              ...
          *          }
@@ -357,13 +361,12 @@ namespace TPG {
          *
          * \param[in] filePath the path to the output file.
          * \param[in] noIndent true if the json format must not be indented.
-         * Files can become large quickly with a lot of traces, so if the file
+         * Files can become large quickly with a lot of inferenceTraces, so if the file
          * will just be analyzed by another program, set this to true to save
          * some space on your disk. Set noIndent to false if you want to keep
          * the file readable.
          */
-        void writeStatsToJson(const char* filePath,
-                              bool noIndent = false) const;
+        void writeStatsToJson(const char* filePath, bool noIndent = false) const;
     };
 
 } // namespace TPG

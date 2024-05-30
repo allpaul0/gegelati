@@ -42,42 +42,36 @@
 double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
 {
     dynamic_cast<const TPGEdgeInstrumented&>(edge).incrementNbVisits();
+    
     return TPGExecutionEngine::evaluateEdge(edge);
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team)
+const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(const TPGTeam& team)
 {
     dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
-
     const TPGEdge& winningEdge = TPGExecutionEngine::evaluateTeam(team);
-    dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
-        .incrementNbTraversal();
+    dynamic_cast<const TPGEdgeInstrumented&>(winningEdge).incrementNbTraversal();
+    
     return winningEdge;
 }
 
-const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
-    executeFromRoot(const TPG::TPGVertex& root)
+const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::executeFromRoot(const TPG::TPGVertex& root)
 {
-    const std::vector<const TPG::TPGVertex*> result =
-        TPGExecutionEngine::executeFromRoot(root);
-
+    const std::vector<const TPG::TPGVertex*> result = TPGExecutionEngine::executeFromRoot(root);
+    
     // Increment action visit
-    dynamic_cast<const TPGActionInstrumented*>(result.back())
-        ->incrementNbVisits();
-
-    this->traceHistory.push_back(result);
+    dynamic_cast<const TPGActionInstrumented*>(result.back())->incrementNbVisits();
+    this->inferenceTraceHistory.push_back(result);
 
     return result;
 }
 
-const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
-    TPGExecutionEngineInstrumented::getTraceHistory() const
+const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::TPGExecutionEngineInstrumented::getInferenceTraceHistory() const
 {
-    return this->traceHistory;
+    return this->inferenceTraceHistory;
 }
 
-void TPG::TPGExecutionEngineInstrumented::clearTraceHistory()
+void TPG::TPGExecutionEngineInstrumented::clearInferenceTraceHistory()
 {
-    this->traceHistory.clear();
+    this->inferenceTraceHistory.clear();
 }
