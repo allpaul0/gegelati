@@ -62,7 +62,7 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
     this->avgNbExecutionPerInstruction.clear();
 
     const std::vector<const TPG::TPGVertex *> roots = graph->getRootVertices();
-    uint64_t nbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0,
+    uint64_t nbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0, 
         [](uint64_t accu, const TPGVertex* vertex) {
             // Raise std::bad_cast if not an instrumented team
             const TPG::TPGTeamInstrumented& rootTeam = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
@@ -127,27 +127,16 @@ void TPG::ExecutionStats::analyzeInferenceTrace(const std::vector<const TPGVerte
     uint64_t nbExecutedLines = 0;
     std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
 
-    std::cout << "Traces" << std::endl;
-
-    for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamsIterator = inferenceTrace.cbegin(); inferenceTraceTeamsIterator != inferenceTrace.cend() - 1; inferenceTraceTeamsIterator++) {
-        std::cout << *inferenceTraceTeamsIterator << std::endl;
-    }
-    
-    std::cout << std::endl;
-
     // For of each visited teams, analysing its edges
     for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamsIterator = inferenceTrace.cbegin(); inferenceTraceTeamsIterator != inferenceTrace.cend() - 1; inferenceTraceTeamsIterator++) {
         for (const TPG::TPGEdge* edge : (*inferenceTraceTeamsIterator)->getOutgoingEdges()) {
-
-            std::cout << "edge->getDestination(): " << edge->getDestination() << std::endl;
-                 
+  
             // Edges leading to a previously visited teams (including the current team) are not evaluated
             auto endSearchIt = inferenceTraceTeamsIterator + 1;
 
-            std::cout << *std::find(inferenceTrace.begin(), endSearchIt, edge->getDestination()) << std::endl;
-
-            if (std::find(inferenceTrace.begin(), endSearchIt, edge->getDestination()) != endSearchIt)
+            if (std::find(inferenceTrace.cbegin(), endSearchIt, edge->getDestination()) != endSearchIt) {
                 continue;
+            }
 
             nbEvaluatedPrograms++;
             nbExecutedLines += edge->getProgram().getNbLines();
@@ -194,8 +183,7 @@ double TPG::ExecutionStats::getAvgExecutedLines() const
 {
     return this->avgExecutedLines;
 }
-const std::map<size_t, double>& TPG::ExecutionStats::
-    getAvgNbExecutionPerInstruction() const
+const std::map<size_t, double>& TPG::ExecutionStats::getAvgNbExecutionPerInstruction() const
 {
     return this->avgNbExecutionPerInstruction;
 }
@@ -213,18 +201,15 @@ const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedPrograms
 {
     return this->distribNbEvaluatedPrograms;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines()
-    const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines() const
 {
     return this->distribNbExecutedLines;
 }
-const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::
-    getDistribNbExecutionPerInstruction() const
+const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::getDistribNbExecutionPerInstruction() const
 {
     return this->distribNbExecutionPerInstruction;
 }
-const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::
-    getDistribUsedVertices() const
+const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::getDistribUsedVertices() const
 {
     return this->distribNbUsedVertices;
 }
