@@ -69,10 +69,10 @@ std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGFactoryInstrumented::
 }
 
 void TPG::TPGFactoryInstrumented::resetTPGGraphCounters(
-    const TPG::TPGGraph& tpg) const
+    const TPG::TPGGraph& tpgGraph) const
 {
     // Reset all vertices
-    for (const TPG::TPGVertex* vertex : tpg.getVertices()) {
+    for (const TPG::TPGVertex* vertex : tpgGraph.getVertices()) {
         const TPG::TPGVertexInstrumented* vertexI = dynamic_cast<const TPG::TPGVertexInstrumented*>(vertex);
         if (vertexI != nullptr) {
             vertexI->reset();
@@ -80,7 +80,7 @@ void TPG::TPGFactoryInstrumented::resetTPGGraphCounters(
     }
 
     // Reset all edges
-    for (const auto& edge : tpg.getEdges()) {
+    for (const auto& edge : tpgGraph.getEdges()) {
         const TPG::TPGEdgeInstrumented* edgeI = dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
         if (edgeI != nullptr) {
             edgeI->reset();
@@ -88,57 +88,76 @@ void TPG::TPGFactoryInstrumented::resetTPGGraphCounters(
     }
 }
 
-void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpg) const
+void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpgGraph) const
 {
     // Remove unused vertices first
     // (this will remove a few edges as a side-effect)
     // Work on a copy of vertex list as the graph is modified during the for
     // loop.
-    std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
+    std::vector<const TPG::TPGVertex*> vertices(tpgGraph.getVertices());
     for (const TPG::TPGVertex* vertex : vertices) {
+        
         const TPG::TPGVertexInstrumented* vertexI = dynamic_cast<const TPG::TPGVertexInstrumented*>(vertex);
+        
         // If the vertex is instrumented AND was never visited
         if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
             // remove it
-            tpg.removeVertex(*vertex);
+            tpgGraph.removeVertex(*vertex);
         }
     }
 
     // Remove un-traversed edges
     std::vector<const TPG::TPGEdge*> edges;
+
     // Copy the edge list before iteration
-    for (auto& edge : tpg.getEdges()) {
-        edges.push_back(edge.get());
+    for (const std::unique_ptr<TPG::TPGEdge>& edgePtr : tpgGraph.getEdges()) {
+        
+        // Dereference the unique_ptr to access TPGEdge object
+        const TPG::TPGEdge& edge = *edgePtr;
+        edges.push_back(&edge);
     }
+    
     // Iterate on the edge list
-    for (auto edge : edges) {
+    for (const TPG::TPGEdge* edge : edges) {
+       
         const TPG::TPGEdgeInstrumented* edgeI = dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge);
+        
+        // If the vertex is instrumented AND was never visited
         if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
-            tpg.removeEdge(*edge);
+            // remove it
+            tpgGraph.removeEdge(*edge);
         }
     }
 
-    // Remove team with only one output program
-    std::vector<const TPG::TPGVertex*> vertices2(tpg.getVertices());
+    // Remove teams with only one output program
+    std::vector<const TPG::TPGVertex*> vertices2(tpgGraph.getVertices());
+    
     for (const TPG::TPGVertex* vertex : vertices2) {
+        
         // If vertex is a team
         if (typeid(*vertex) == typeid(TPG::TPGTeamInstrumented)){
-            const TPG::TPGTeamInstrumented* teamI =
-                dynamic_cast<const TPG::TPGTeamInstrumented*>(vertex);
+            
+            const TPG::TPGTeamInstrumented* teamI = dynamic_cast<const TPG::TPGTeamInstrumented*>(vertex);
+            
             // If the team has only one outgoing edge
             if(teamI->getOutgoingEdges().size() == 1){
+                
                 // Get the destination vertex of the team
-                auto outgoingVertices = teamI->getOutgoingEdges().front()->getDestination();
+                auto destinationVertices = teamI->getOutgoingEdges().front()->getDestination();
+                
                 // Set the new destination of all the incomming edges to the new destination
                 std::vector<TPG::TPGEdge *> incomingEdges;
-                for(auto incomingEdge: teamI->getIncomingEdges()){
+                
+                for(TPG::TPGEdge* incomingEdge: teamI->getIncomingEdges()){
                     incomingEdges.push_back(incomingEdge);
                 }
-                for(auto incomingEdge: incomingEdges){
-                    tpg.setEdgeDestination(*incomingEdge, *outgoingVertices);
+                
+                for(TPG::TPGEdge* incomingEdge: incomingEdges){
+                    tpgGraph.setEdgeDestination(*incomingEdge, *destinationVertices);
                 }
+                
                 // Delete the program between old and new destination ?
-                tpg.removeVertex(*vertex);
+                tpgGraph.removeVertex(*vertex);
             }
         }
     }
