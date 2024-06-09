@@ -66,14 +66,14 @@ namespace TPG {
         const std::vector<const TPG::TPGVertex*> inferenceTrace;
 
         /// Number of team evaluated.
-        const uint64_t nbEvaluatedTeams;
+        const uint64_t nbEvaluatedTeamsPerInf;
         /// Number of programs evaluated.
-        const uint64_t nbEvaluatedPrograms;
+        const uint64_t nbEvaluatedProgramsPerInf;
         /// Number of program lines executed.
-        const uint64_t nbExecutedLines;
+        const uint64_t nbExecutedLinesPerInf;
         /// Map that associate the instruction indexes with the number of
         /// execution of the corresponding Instruction.
-        const std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
+        const std::map<uint64_t, uint64_t> nbExecutionForEachInstrPerInf;
     };
 
     /**
@@ -120,20 +120,20 @@ namespace TPG {
         /* Average results */
 
         /// Average number of evaluated teams per inference.
-        double avgEvaluatedTeams = 0.0;
+        double avgNbEvaluatedTeamsPerInf = 0.0;
 
         /// Average number of programs evaluated per inference.
-        double avgEvaluatedPrograms = 0.0;
+        double avgNbEvaluatedProgramsPerInf = 0.0;
 
         /// Average number of executed lines per inference.
-        double avgExecutedLines = 0.0;
+        double avgNbExecutedLinesPerInf = 0.0;
 
         /**
          * This map associate an Instruction identifier from an
          * instruction set with the average number of execution
          * of the instruction per inference.
          */
-        std::map<size_t, double> avgNbExecutionPerInstruction;
+        std::map<size_t, double> avgNbExecutionForEachInstrPerInf;
 
         /* Analyzed inference traces */
 
@@ -146,44 +146,44 @@ namespace TPG {
          * \brief Distribution of the number of evaluated team per inference for
          * all analyzed inference traces.
          *
-         * distribNbEvaluatedTeams[x] = y --> y inferences evaluated x teams.
+         * distribNbEvaluatedTeamsPerInf[x] = y --> y inferences evaluated x teams.
          */
-        std::map<size_t, size_t> distribNbEvaluatedTeams;
+        std::map<size_t, size_t> distribNbEvaluatedTeamsPerInf;
 
         /**
          * \brief Distribution of the number of evaluated programs per inference
          * for all analyzed inference traces.
          *
-         * distribNbEvaluatedPrograms[x] = y --> y inferences evaluated x
+         * distribNbEvaluatedProgramsPerInf[x] = y --> y inferences evaluated x
          * programs.
          */
-        std::map<size_t, size_t> distribNbEvaluatedPrograms;
+        std::map<size_t, size_t> distribNbEvaluatedProgramsPerInf;
 
         /**
          * \brief Distribution of the number of executed lines per inference for
          * all analyzed inference traces.
          *
-         * distribNbExecutedLines[x] = y --> y inferences executed x lines.
+         * distribNbExecutedLinesPerInf[x] = y --> y inferences executed x lines.
          */
-        std::map<size_t, size_t> distribNbExecutedLines;
+        std::map<size_t, size_t> distribNbExecutedLinesPerInf;
 
         /**
          * \brief Distributions of the number of executions of each instruction
          * per inference for all analyzed inference traces.
          *
-         * distribNbExecutionPerInstruction[i][x] = y --> for instruction at
+         * distribNbExecutionForEachInstrPerInf[i][x] = y --> for instruction at
          * index i, y inferences executed this instruction x times.
          */
-        std::map<size_t, std::map<size_t, size_t>> distribNbExecutionPerInstruction;
+        std::map<size_t, std::map<size_t, size_t>> distribNbExecutionForEachInstrPerInf;
 
         /**
          * \brief Distribution of the number of visit each vertex had for all
          * analyzed inference traces.
          *
-         * distribNbUsedVertices[v] = y --> y inferences visited vertex pointed by
+         * distribNbVisitForEachVertexPerInf[v] = y --> y inferences visited vertex pointed by
          * v.
          */
-        std::map<const TPG::TPGVertex*, size_t> distribNbUsedVertices;
+        std::map<const TPG::TPGVertex*, size_t> distribNbVisitForEachVertexPerInf;
 
         /// Graph used during last call to analyzeExecution
         const TPGGraph* lastAnalyzedGraph = nullptr;
@@ -250,36 +250,36 @@ namespace TPG {
                               const TPGGraph* graph);
 
         /// Get the average number of evaluated teams per inference.
-        double getAvgEvaluatedTeams() const;
+        double getAvgNbEvaluatedTeamsPerInf() const;
 
         /// Get the average number of programs evaluated per inference.
-        double getAvgEvaluatedPrograms() const;
+        double getAvgNbEvaluatedProgramsPerInf() const;
 
         /// Get the average number of executed lines per inference.
-        double getAvgExecutedLines() const;
+        double getAvgNbExecutedLinesPerInf() const;
 
         /// Get a reference to the map that associate each instruction to
         /// its average number of execution per inference.
-        const std::map<size_t, double>& getAvgNbExecutionPerInstruction() const;
+        const std::map<size_t, double>& getAvgNbExecutionForEachInstrPerInf() const;
 
         /// Get stored inferenceTrace statistics.
         const std::vector<InferenceTraceStats>& getInferenceTracesStats() const;
 
         /// Get the distribution of the number of evaluated teams.
-        const std::map<size_t, size_t>& getDistribEvaluatedTeams() const;
+        const std::map<size_t, size_t>& getDistribNbEvaluatedTeamsPerInf() const;
 
         /// Get the distribution of the number of evaluated programs.
-        const std::map<size_t, size_t>& getDistribEvaluatedPrograms() const;
+        const std::map<size_t, size_t>& getDistribNbEvaluatedProgramsPerInf() const;
 
         /// Get the distribution of the number of executed lines.
-        const std::map<size_t, size_t>& getDistribExecutedLines() const;
+        const std::map<size_t, size_t>& getDistribNbExecutedLinesPerInf() const;
 
         /// Get distributions of the number of executions for each instruction.
         const std::map<size_t, std::map<size_t, size_t>>&
-        getDistribNbExecutionPerInstruction() const;
+        getDistribNbExecutionForEachInstrPerInf() const;
 
         /// Get the distribution if the number of visit for each vertex.
-        const std::map<const TPG::TPGVertex*, size_t>& getDistribUsedVertices() const;
+        const std::map<const TPG::TPGVertex*, size_t>& getDistribNbVisitForEachVertexPerInf() const;
 
         /// Clear stored inferneceTrace statistics and distributions.
         void clearInferenceTracesStats();
@@ -298,31 +298,31 @@ namespace TPG {
          *      {
          *          "ExecutionStats" :
          *          {
-         *              "avgEvaluatedTeams" : value,
-         *              "avgEvaluatedPrograms" : value,
-         *              "avgExecutedLines" : value,
-         *              "avgNbExecutionPerInstruction" :
+         *              "avgNbEvaluatedTeamsPerInf" : value,
+         *              "avgNbEvaluatedProgramsPerInf" : value,
+         *              "avgNbExecutedLinesPerInf" : value,
+         *              "avgNbExecutionForEachInstrPerInf" :
          *              {
          *                  "InstructionIndex" : nbExecution,
          *                  ...
          *              },
-         *              "distributionEvaluatedPrograms" :
+         *              "distributionNbEvaluatedProgramsPerInf" :
          *              {
          *                  "N" : count of inferences which evaluated N
          * programs,
          *                  ...
          *              },
-         *              "distributionEvaluatedTeams" :
+         *              "distributionNbEvaluatedTeamsPerInf" :
          *              {
          *                  "N" : count of inferences which evaluated N teams,
          *                  ...
          *              },
-         *              "distributionExecutedLines" :
+         *              "distributionNbExecutedLinesPerInf" :
          *              {
          *                  "N" : count of inferences which executed N lines,
          *                  ...
          *              },
-         *              "distributionNbExecutionPerInstruction" :
+         *              "distribNbExecutionForEachInstrPerInf" :
          *              {
          *                  "InstructionIndex" :
          *                  {
@@ -332,7 +332,7 @@ namespace TPG {
          *                  },
          *                  ...
          *              },
-         *              "distributionUsedVertices" :
+         *              "distributionNbVisitForEachVertexPerInf" :
          *              {
          *                  "VertexIndex" : count of inferences which visited
          * the vertex,

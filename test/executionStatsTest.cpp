@@ -266,24 +266,24 @@ TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
     ASSERT_NO_THROW(executionStats.analyzeInstrumentedGraph(tpg))
         << "Analysis of a valid tpg execution failed unexpectedly.";
 
-    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 7.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbEvaluatedTeamsPerInf(), 7.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 19.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbEvaluatedProgramsPerInf(), 19.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgExecutedLines(), 25.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutedLinesPerInf(), 25.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // Add
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 1.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(0), 1.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // mac
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 3.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(1), 3.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // Minus
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2),
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(2),
               15.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // MultByConst
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 6.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(3), 6.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
 }
 
@@ -320,55 +320,55 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
 
     const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[0];
 
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeamsPerInf, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedProgramsPerInf, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLinesPerInf, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */
 
-    std::map<size_t, size_t> expectedDistribEvaluatedTeams = {{3, 1}};
-    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = {{7, 1}};
-    std::map<size_t, size_t> expectedDistribExecutedLines = {{9, 1}};
+    std::map<size_t, size_t> expectedDistribNbEvaluatedTeamsPerInf = {{3, 1}};
+    std::map<size_t, size_t> expectedDistribNbEvaluatedProgramsPerInf = {{7, 1}};
+    std::map<size_t, size_t> expectedDistribNbExecutedLinesPerInf = {{9, 1}};
     std::map<size_t, std::map<size_t, size_t>>
-        expectedDistribNbExecutionPerInstruction = {
+        expectedDistribNbExecutionForEachInstrPerInf = {
             {0, {{1, 1}}},
             {1, {{1, 1}}},
             {2, {{5, 1}}},
             {3, {{2, 1}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribNbVisitForEachVertexPerInf = {
         {tpg->getVertices()[0], 1},
         {tpg->getVertices()[1], 1},
         {tpg->getVertices()[2], 1},
         {tpg->getVertices()[6], 1}};
 
-    ASSERT_EQ(expectedDistribEvaluatedTeams,
-              executionStats.getDistribEvaluatedTeams())
+    ASSERT_EQ(expectedDistribNbEvaluatedTeamsPerInf,
+              executionStats.getDistribNbEvaluatedTeamsPerInf())
         << "Wrong evaluated teams distribution.";
-    ASSERT_EQ(expectedDistribEvaluatedPrograms,
-              executionStats.getDistribEvaluatedPrograms())
+    ASSERT_EQ(expectedDistribNbEvaluatedProgramsPerInf,
+              executionStats.getDistribNbEvaluatedProgramsPerInf())
         << "Wrong evaluated programs distribution.";
-    ASSERT_EQ(expectedDistribExecutedLines,
-              executionStats.getDistribExecutedLines())
+    ASSERT_EQ(expectedDistribNbExecutedLinesPerInf,
+              executionStats.getDistribNbExecutedLinesPerInf())
         << "Wrong executed lines distribution.";
-    ASSERT_EQ(expectedDistribNbExecutionPerInstruction,
-              executionStats.getDistribNbExecutionPerInstruction())
+    ASSERT_EQ(expectedDistribNbExecutionForEachInstrPerInf,
+              executionStats.getDistribNbExecutionForEachInstrPerInf())
         << "Wrong executions per instruction distributions.";
-    ASSERT_EQ(expectedDistribUsedVertices,
-              executionStats.getDistribUsedVertices())
+    ASSERT_EQ(expectedDistribNbVisitForEachVertexPerInf,
+              executionStats.getDistribNbVisitForEachVertexPerInf())
         << "Wrong used vertices distribution.";
 }
 
@@ -386,20 +386,20 @@ TEST_F(ExecutionStatsTest, ClearTracesStats)
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 0)
         << "inferenceTracesStats is not empty after clearing.";
 
-    ASSERT_EQ(executionStats.getDistribEvaluatedTeams().size(), 0)
-        << "distribEvaluatedTeams is not empty after clearing.";
+    ASSERT_EQ(executionStats.getDistribNbEvaluatedTeamsPerInf().size(), 0)
+        << "DistribNbEvaluatedTeamsPerInf is not empty after clearing.";
 
-    ASSERT_EQ(executionStats.getDistribEvaluatedPrograms().size(), 0)
-        << "distribEvaluatedPrograms is not empty after clearing.";
+    ASSERT_EQ(executionStats.getDistribNbEvaluatedProgramsPerInf().size(), 0)
+        << "DistribNbEvaluatedProgramsPerInf is not empty after clearing.";
 
-    ASSERT_EQ(executionStats.getDistribExecutedLines().size(), 0)
-        << "distribExecutedLines is not empty after clearing.";
+    ASSERT_EQ(executionStats.getDistribNbExecutedLinesPerInf().size(), 0)
+        << "DistribNbExecutedLinesPerInf is not empty after clearing.";
 
-    ASSERT_EQ(executionStats.getDistribNbExecutionPerInstruction().size(), 0)
-        << "distribNbExecutionPerInstruction is not empty after clearing.";
+    ASSERT_EQ(executionStats.getDistribNbExecutionForEachInstrPerInf().size(), 0)
+        << "DistribNbExecutionForEachInstrPerInf is not empty after clearing.";
 
-    ASSERT_EQ(executionStats.getDistribUsedVertices().size(), 0)
-        << "distribUsedVertices is not empty after clearing.";
+    ASSERT_EQ(executionStats.getDistribNbVisitForEachVertexPerInf().size(), 0)
+        << "DistribNbVisitForEachVertexPerInf is not empty after clearing.";
 }
 
 TEST_F(ExecutionStatsTest, AnalyzeExecution)
@@ -417,79 +417,79 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
         << "Incorrect number of analyzed traces.";
 
     /* Average graph execution statistics */
-    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 7.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbEvaluatedTeamsPerInf(), 7.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 19.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbEvaluatedProgramsPerInf(), 19.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgExecutedLines(), 25.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutedLinesPerInf(), 25.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // Add
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 1.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(0), 1.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // mac
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 3.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(1), 3.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // Minus
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2),
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(2),
               15.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
     // MultByConst
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 6.0 / 3.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionForEachInstrPerInf().at(3), 6.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
 
     const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[2];
 
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeamsPerInf, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedProgramsPerInf, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLinesPerInf, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(inferenceTraceStats.nbExecutionPerInstruction.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */
 
-    std::map<size_t, size_t> expectedDistribEvaluatedTeams = {{2, 2}, {3, 1}};
-    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = {{6, 2},
+    std::map<size_t, size_t> expectedDistribNbEvaluatedTeamsPerInf = {{2, 2}, {3, 1}};
+    std::map<size_t, size_t> expectedDistribNbEvaluatedProgramsPerInf = {{6, 2},
                                                                  {7, 1}};
-    std::map<size_t, size_t> expectedDistribExecutedLines = {{8, 2}, {9, 1}};
+    std::map<size_t, size_t> expectedDistribNbExecutedLinesPerInf = {{8, 2}, {9, 1}};
     std::map<size_t, std::map<size_t, size_t>>
-        expectedDistribNbExecutionPerInstruction = {
+        expectedDistribNbExecutionForEachInstrPerInf = {
             {0, {{1, 1}}},
             {1, {{1, 3}}},
             {2, {{5, 3}}},
             {3, {{2, 3}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribNbVisitForEachVertexPerInf = {
         {tpg->getVertices()[0], 3},
         {tpg->getVertices()[1], 3},
         {tpg->getVertices()[2], 1},
         {tpg->getVertices()[5], 1},
         {tpg->getVertices()[6], 2}};
 
-    ASSERT_EQ(expectedDistribEvaluatedTeams,
-              executionStats.getDistribEvaluatedTeams())
+    ASSERT_EQ(expectedDistribNbEvaluatedTeamsPerInf,
+              executionStats.getDistribNbEvaluatedTeamsPerInf())
         << "Wrong evaluated teams distribution.";
-    ASSERT_EQ(expectedDistribEvaluatedPrograms,
-              executionStats.getDistribEvaluatedPrograms())
+    ASSERT_EQ(expectedDistribNbEvaluatedProgramsPerInf,
+              executionStats.getDistribNbEvaluatedProgramsPerInf())
         << "Wrong evaluated programs distribution.";
-    ASSERT_EQ(expectedDistribExecutedLines,
-              executionStats.getDistribExecutedLines())
+    ASSERT_EQ(expectedDistribNbExecutedLinesPerInf,
+              executionStats.getDistribNbExecutedLinesPerInf())
         << "Wrong executed lines distribution.";
-    ASSERT_EQ(expectedDistribNbExecutionPerInstruction,
-              executionStats.getDistribNbExecutionPerInstruction())
+    ASSERT_EQ(expectedDistribNbExecutionForEachInstrPerInf,
+              executionStats.getDistribNbExecutionForEachInstrPerInf())
         << "Wrong executions per instruction distributions.";
-    ASSERT_EQ(expectedDistribUsedVertices,
-              executionStats.getDistribUsedVertices())
+    ASSERT_EQ(expectedDistribNbVisitForEachVertexPerInf,
+              executionStats.getDistribNbVisitForEachVertexPerInf())
         << "Wrong used vertices distribution.";
 }
 

@@ -1,10 +1,13 @@
 # GEGELATI Changelog
 
 ## Release version 1.3.2
-_2024.05.16_
+_2024.06.09_
 ## Changes 
-* LearningAgent constructor can take graph as param, used for calling Validation directly using a pre-trained graph
-* LearningAgent::evaluateJob uses rng.getUnsignedInt64() to draw random number instead of iterationNumber & generationNumber which creates multiple seed collisions during training and validation
+  * Parameter `iterationNumber`: uint64_t iterates over `nbIterationsPerPolicyEvaluation`. 
+  * Parameter `generationNumber`: uint64_t. 
+  * During `Training` these parameters are separatly hashed and then combined using a XOR operator to form the hash/seed used for initializing the Learninig Environment. 
+  * During `Validation`, a left shift is performed on `iterationNumber` to avoid any collision of the space of iteration. 
+  * During `Validation`, the `generationNumber` is not used to allow for a fixed ensemble for the Validation set. This aims to copy ML methods of Training set, Validation set. Other design choices could be proposed. 
 
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_

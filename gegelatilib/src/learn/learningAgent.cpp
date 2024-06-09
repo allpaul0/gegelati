@@ -129,7 +129,7 @@ Learn::LearningAgent::evaluateJob(
     double result = 0.0;
 
     // Evaluate nbIteration times
-    for (auto iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
+    for (uint64_t iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
      
         Data::Hash<uint64_t> hasher;
         // If this is a VALIDATION process, make sure the hash used does not overlap 
@@ -138,8 +138,10 @@ Learn::LearningAgent::evaluateJob(
         // and VALIDATION set (hashes).
         if(mode == LearningMode::VALIDATION) {
             iterationNumber <<= 8; 
+            uint64_t hash = hasher(iterationNumber);
+        }else  {
+            uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
         }
-        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
         
         // Reset the learning Environment
         le.reset(hash, mode);
@@ -156,12 +158,11 @@ Learn::LearningAgent::evaluateJob(
 
         // Update results
         result += le.getScore();
-        //std::cout << "score: " << le.getScore() << std::endl;
     }
 
     // Create the EvaluationResult
-    auto evaluationResult = std::shared_ptr<EvaluationResult>(new EvaluationResult(
-            result / (double)params.nbIterationsPerPolicyEvaluation,
+    auto evaluationResult = std::shared_ptr<EvaluationResult>(
+        new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation, 
             params.nbIterationsPerPolicyEvaluation));
 
     // Combine it with previous one if any

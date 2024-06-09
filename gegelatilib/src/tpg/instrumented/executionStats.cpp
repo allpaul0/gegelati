@@ -59,7 +59,7 @@ void TPG::ExecutionStats::analyzeProgram(
 
 void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
 {
-    this->avgNbExecutionPerInstruction.clear();
+    this->avgNbExecutionForEachInstrPerInf.clear();
 
     const std::vector<const TPG::TPGVertex *> roots = graph->getRootVertices();
     uint64_t nbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0, 
@@ -110,12 +110,12 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
         }
     }
 
-    this->avgEvaluatedTeams = (double)nbEvaluatedTeams / (double)nbInferences;
-    this->avgEvaluatedPrograms = (double)nbEvaluatedPrograms / (double)nbInferences;
-    this->avgExecutedLines = (double)nbExecutedLines / (double)nbInferences;
+    this->avgNbEvaluatedTeamsPerInf = (double)nbEvaluatedTeams / (double)nbInferences;
+    this->avgNbEvaluatedProgramsPerInf = (double)nbEvaluatedPrograms / (double)nbInferences;
+    this->avgNbExecutedLinesPerInf = (double)nbExecutedLines / (double)nbInferences;
 
     for (const auto& p : totalExecutionsPerInstruction) {
-        avgNbExecutionPerInstruction[p.first] = (double)p.second / (double)nbInferences;
+        avgNbExecutionForEachInstrPerInf[p.first] = (double)p.second / (double)nbInferences;
     }
 }
 
@@ -147,14 +147,14 @@ void TPG::ExecutionStats::analyzeInferenceTrace(const std::vector<const TPGVerte
     this->inferenceTracesStats.push_back({inferenceTrace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
 
     // Update distributions
-    this->distribNbEvaluatedTeams[nbEvaluatedTeams]++;
-    this->distribNbEvaluatedPrograms[nbEvaluatedPrograms]++;
-    this->distribNbExecutedLines[nbExecutedLines]++;
+    this->distribNbEvaluatedTeamsPerInf[nbEvaluatedTeams]++;
+    this->distribNbEvaluatedProgramsPerInf[nbEvaluatedPrograms]++;
+    this->distribNbExecutedLinesPerInf[nbExecutedLines]++;
     for (const std::pair<const size_t, const size_t>& p : nbExecutionPerInstruction) {
-        this->distribNbExecutionPerInstruction[p.first][p.second]++;
+        this->distribNbExecutionForEachInstrPerInf[p.first][p.second]++;
     }
     for (const TPG::TPGVertex* inferenceTraceVertex : inferenceTrace) {
-        this->distribNbUsedVertices[inferenceTraceVertex]++;
+        this->distribNbVisitForEachVertexPerInf[inferenceTraceVertex]++;
     }
 }
 
@@ -171,21 +171,21 @@ void TPG::ExecutionStats::analyzeExecution(
     }
 }
 
-double TPG::ExecutionStats::getAvgEvaluatedTeams() const
+double TPG::ExecutionStats::getAvgNbEvaluatedTeamsPerInf() const
 {
-    return this->avgEvaluatedTeams;
+    return this->avgNbEvaluatedTeamsPerInf;
 }
-double TPG::ExecutionStats::getAvgEvaluatedPrograms() const
+double TPG::ExecutionStats::getAvgNbEvaluatedProgramsPerInf() const
 {
-    return this->avgEvaluatedPrograms;
+    return this->avgNbEvaluatedProgramsPerInf;
 }
-double TPG::ExecutionStats::getAvgExecutedLines() const
+double TPG::ExecutionStats::getAvgNbExecutedLinesPerInf() const
 {
-    return this->avgExecutedLines;
+    return this->avgNbExecutedLinesPerInf;
 }
-const std::map<size_t, double>& TPG::ExecutionStats::getAvgNbExecutionPerInstruction() const
+const std::map<size_t, double>& TPG::ExecutionStats::getAvgNbExecutionForEachInstrPerInf() const
 {
-    return this->avgNbExecutionPerInstruction;
+    return this->avgNbExecutionForEachInstrPerInf;
 }
 
 const std::vector<TPG::InferenceTraceStats>& TPG::ExecutionStats::getInferenceTracesStats() const
@@ -193,35 +193,35 @@ const std::vector<TPG::InferenceTraceStats>& TPG::ExecutionStats::getInferenceTr
     return this->inferenceTracesStats;
 }
 
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedTeams() const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribNbEvaluatedTeamsPerInf() const
 {
-    return this->distribNbEvaluatedTeams;
+    return this->distribNbEvaluatedTeamsPerInf;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedPrograms() const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribNbEvaluatedProgramsPerInf() const
 {
-    return this->distribNbEvaluatedPrograms;
+    return this->distribNbEvaluatedProgramsPerInf;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines() const
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribNbExecutedLinesPerInf() const
 {
-    return this->distribNbExecutedLines;
+    return this->distribNbExecutedLinesPerInf;
 }
-const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::getDistribNbExecutionPerInstruction() const
+const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::getDistribNbExecutionForEachInstrPerInf() const
 {
-    return this->distribNbExecutionPerInstruction;
+    return this->distribNbExecutionForEachInstrPerInf;
 }
-const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::getDistribUsedVertices() const
+const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::getDistribNbVisitForEachVertexPerInf() const
 {
-    return this->distribNbUsedVertices;
+    return this->distribNbVisitForEachVertexPerInf;
 }
 
 void TPG::ExecutionStats::clearInferenceTracesStats()
 {
     this->inferenceTracesStats.clear();
-    this->distribNbEvaluatedTeams.clear();
-    this->distribNbEvaluatedPrograms.clear();
-    this->distribNbExecutedLines.clear();
-    this->distribNbExecutionPerInstruction.clear();
-    this->distribNbUsedVertices.clear();
+    this->distribNbEvaluatedTeamsPerInf.clear();
+    this->distribNbEvaluatedProgramsPerInf.clear();
+    this->distribNbExecutedLinesPerInf.clear();
+    this->distribNbExecutionForEachInstrPerInf.clear();
+    this->distribNbVisitForEachVertexPerInf.clear();
 }
 
 void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) const
@@ -242,31 +242,31 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
     Json::Value root;
 
     // Average statistics
-    root["ExecutionStats"]["avgEvaluatedTeams"] = this->avgEvaluatedTeams;
-    root["ExecutionStats"]["avgEvaluatedPrograms"] = this->avgEvaluatedPrograms;
-    root["ExecutionStats"]["avgExecutedLines"] = this->avgExecutedLines;
+    root["ExecutionStats"]["avgNbEvaluatedTeamsPerInf"] = this->avgNbEvaluatedTeamsPerInf;
+    root["ExecutionStats"]["avgNbEvaluatedProgramsPerInf"] = this->avgNbEvaluatedProgramsPerInf;
+    root["ExecutionStats"]["avgNbExecutedLinesPerInf"] = this->avgNbExecutedLinesPerInf;
 
-    for (const auto& p : this->avgNbExecutionPerInstruction)
-        root["ExecutionStats"]["avgNbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
+    for (const auto& p : this->avgNbExecutionForEachInstrPerInf)
+        root["ExecutionStats"]["avgNbExecutionForEachInstrPerInf"][std::to_string(p.first)] = p.second;
 
     // Distributions
-    for (const auto& p : this->distribNbEvaluatedTeams)
-        root["ExecutionStats"]["distributionNbEvaluatedTeams"][std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbEvaluatedTeamsPerInf)
+        root["ExecutionStats"]["distribNbEvaluatedTeamsPerInf"][std::to_string(p.first)] = p.second;
 
-    for (const auto& p : this->distribNbEvaluatedPrograms)
-        root["ExecutionStats"]["distributionNbEvaluatedPrograms"][std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbEvaluatedProgramsPerInf)
+        root["ExecutionStats"]["distribNbEvaluatedProgramsPerInf"][std::to_string(p.first)] = p.second;
 
-    for (const auto& p : this->distribNbExecutedLines)
-        root["ExecutionStats"]["distributionNbExecutedLines"][std::to_string(p.first)] = p.second;
+    for (const auto& p : this->distribNbExecutedLinesPerInf)
+        root["ExecutionStats"]["distribNbExecutedLinesPerInf"][std::to_string(p.first)] = p.second;
 
-    for (const auto& p1 : this->distribNbExecutionPerInstruction) {
+    for (const auto& p1 : this->distribNbExecutionForEachInstrPerInf) {
         for (const auto& p2 : p1.second)
-            root["ExecutionStats"]["distributionNbExecutionPerInstruction"][std::to_string(p1.first)][std::to_string(p2.first)] = p2.second;
+            root["ExecutionStats"]["distribNbExecutionForEachInstrPerInf"][std::to_string(p1.first)][std::to_string(p2.first)] = p2.second;
     }
 
-    for (const auto& p : this->distribNbUsedVertices) {
+    for (const auto& p : this->distribNbVisitForEachVertexPerInf) {
         size_t idxVertex = vertexIndexes[p.first];
-        root["ExecutionStats"]["distributionNbUsedVertices"][std::to_string(idxVertex)] = p.second;
+        root["ExecutionStats"]["distribNbVisitForEachVertexPerInf"][std::to_string(idxVertex)] = p.second;
     }
 
     // Trace statistics
@@ -280,10 +280,10 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
             }
         }
 
-        root["TracesStats"][nbTrace]["nbEvaluatedTeams"] = inferenceTraceStats.nbEvaluatedTeams;
-        root["TracesStats"][nbTrace]["nbEvaluatedPrograms"] = inferenceTraceStats.nbEvaluatedPrograms;
-        root["TracesStats"][nbTrace]["nbExecutedLines"] = inferenceTraceStats.nbExecutedLines;
-        for (const auto& p : inferenceTraceStats.nbExecutionPerInstruction)
+        root["TracesStats"][nbTrace]["nbEvaluatedTeamsPerInf"] = inferenceTraceStats.nbEvaluatedTeamsPerInf;
+        root["TracesStats"][nbTrace]["nbEvaluatedProgramsPerInf"] = inferenceTraceStats.nbEvaluatedProgramsPerInf;
+        root["TracesStats"][nbTrace]["nbExecutedLinesPerInf"] = inferenceTraceStats.nbExecutedLinesPerInf;
+        for (const auto& p : inferenceTraceStats.nbExecutionForEachInstrPerInf)
             root["TracesStats"][nbTrace]["nbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
         i++;
     }
