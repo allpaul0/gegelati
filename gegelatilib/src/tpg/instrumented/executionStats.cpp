@@ -62,7 +62,8 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
     this->avgNbExecutionForEachInstrPerInf.clear();
 
     const std::vector<const TPG::TPGVertex *> roots = graph->getRootVertices();
-    uint64_t nbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0, 
+
+    uint64_t totalNbInferences = std::accumulate(roots.cbegin(), roots.cend(), (uint64_t)0, 
         [](uint64_t accu, const TPGVertex* vertex) {
             // Raise std::bad_cast if not an instrumented team
             const TPG::TPGTeamInstrumented& rootTeam = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
@@ -110,12 +111,12 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
         }
     }
 
-    this->avgNbEvaluatedTeamsPerInf = (double)nbEvaluatedTeams / (double)nbInferences;
-    this->avgNbEvaluatedProgramsPerInf = (double)nbEvaluatedPrograms / (double)nbInferences;
-    this->avgNbExecutedLinesPerInf = (double)nbExecutedLines / (double)nbInferences;
+    this->avgNbEvaluatedTeamsPerInf = (double)nbEvaluatedTeams / (double)totalNbInferences;
+    this->avgNbEvaluatedProgramsPerInf = (double)nbEvaluatedPrograms / (double)totalNbInferences;
+    this->avgNbExecutedLinesPerInf = (double)nbExecutedLines / (double)totalNbInferences;
 
     for (const auto& p : totalExecutionsPerInstruction) {
-        avgNbExecutionForEachInstrPerInf[p.first] = (double)p.second / (double)nbInferences;
+        avgNbExecutionForEachInstrPerInf[p.first] = (double)p.second / (double)totalNbInferences;
     }
 }
 
@@ -162,13 +163,14 @@ void TPG::ExecutionStats::analyzeExecution(
     const TPG::TPGExecutionEngineInstrumented& tee, const TPG::TPGGraph* graph)
 {
     clearInferenceTracesStats();
-    this->lastAnalyzedGraph = graph; // Will be used by writeStatsToJson()
 
     analyzeInstrumentedGraph(graph);
 
     for (const auto& inferenceTrace : tee.getInferenceTraceHistory()) {
         analyzeInferenceTrace(inferenceTrace);
     }
+
+    this->lastAnalyzedGraph = graph; // Will be used by writeStatsToJson()
 }
 
 double TPG::ExecutionStats::getAvgNbEvaluatedTeamsPerInf() const

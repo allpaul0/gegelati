@@ -129,6 +129,7 @@ void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpg
         }
     }
 
+    /*
     // Remove teams with only one output program
     std::vector<const TPG::TPGVertex*> vertices2(tpgGraph.getVertices());
     
@@ -142,8 +143,8 @@ void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpg
             // If the team has only one outgoing edge
             if(teamI->getOutgoingEdges().size() == 1){
                 
-                // Get the destination vertex of the team
-                auto destinationVertices = teamI->getOutgoingEdges().front()->getDestination();
+                // Get the destination vertex of the edge
+                const TPG::TPGVertex* vertexDestination = teamI->getOutgoingEdges().front()->getDestination();
                 
                 // Set the new destination of all the incomming edges to the new destination
                 std::vector<TPG::TPGEdge *> incomingEdges;
@@ -153,7 +154,7 @@ void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpg
                 }
                 
                 for(TPG::TPGEdge* incomingEdge: incomingEdges){
-                    tpgGraph.setEdgeDestination(*incomingEdge, *destinationVertices);
+                    tpgGraph.setEdgeDestination(*incomingEdge, *vertexDestination);
                 }
                 
                 // Delete the program between old and new destination ?
@@ -161,4 +162,5 @@ void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(TPG::TPGGraph& tpg
             }
         }
     }
+    */
 }
