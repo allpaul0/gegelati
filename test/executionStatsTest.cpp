@@ -320,21 +320,21 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
 
     const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[0];
 
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeamsPerInf, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedProgramsPerInf, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(inferenceTraceStats.nbExecutedLinesPerInf, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */
@@ -439,21 +439,21 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
 
     const TPG::InferenceTraceStats& inferenceTraceStats = executionStats.getInferenceTracesStats()[2];
 
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeamsPerInf, 3) << "Wrong number of evaluated teams.";
-    ASSERT_EQ(inferenceTraceStats.nbEvaluatedProgramsPerInf, 7)
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
+    ASSERT_EQ(inferenceTraceStats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(inferenceTraceStats.nbExecutedLinesPerInf, 9) << "Wrong number of executed lines.";
+    ASSERT_EQ(inferenceTraceStats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(0), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(0), 1)
         << "Wrong number of executed instruction.";
     // mac
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(1), 1)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(1), 1)
         << "Wrong number of executed instruction.";
     // Minus
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(2), 5)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(2), 5)
         << "Wrong number of executed instruction.";
     // MultByConst
-    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstrPerInf.at(3), 2)
+    ASSERT_EQ(inferenceTraceStats.nbExecutionForEachInstr.at(3), 2)
         << "Wrong number of executed instruction.";
 
     /* Distributions */

@@ -48,12 +48,12 @@
 #include "tpg/instrumented/tpgVertexInstrumented.h"
 
 void TPG::ExecutionStats::analyzeProgram(
-    std::map<uint64_t, uint64_t>& instructionCounts,
+    std::map<uint64_t, uint64_t>& nbExecutionForEachInstr,
     const Program::Program& program)
 {
 
     for (int i = 0; i < program.getNbLines(); i++) {
-        instructionCounts[program.getLine(i).getInstructionIndex()]++;
+        nbExecutionForEachInstr[program.getLine(i).getInstructionIndex()]++;
     }
 }
 
@@ -126,7 +126,7 @@ void TPG::ExecutionStats::analyzeInferenceTrace(const std::vector<const TPGVerte
     uint64_t nbEvaluatedTeams = inferenceTrace.size() - 1;
     uint64_t nbEvaluatedPrograms = 0;
     uint64_t nbExecutedLines = 0;
-    std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
+    std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
 
     // For of each visited teams, analysing its edges
     for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamsIterator = inferenceTrace.cbegin(); inferenceTraceTeamsIterator != inferenceTrace.cend() - 1; inferenceTraceTeamsIterator++) {
@@ -141,17 +141,17 @@ void TPG::ExecutionStats::analyzeInferenceTrace(const std::vector<const TPGVerte
 
             nbEvaluatedPrograms++;
             nbExecutedLines += edge->getProgram().getNbLines();
-            analyzeProgram(nbExecutionPerInstruction, edge->getProgram());
+            analyzeProgram(nbExecutionForEachInstr, edge->getProgram());
         }
     }
 
-    this->inferenceTracesStats.push_back({inferenceTrace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
+    this->vecInferenceTraceStats.push_back({inferenceTrace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionForEachInstr});
 
     // Update distributions
     this->distribNbEvaluatedTeamsPerInf[nbEvaluatedTeams]++;
     this->distribNbEvaluatedProgramsPerInf[nbEvaluatedPrograms]++;
     this->distribNbExecutedLinesPerInf[nbExecutedLines]++;
-    for (const std::pair<const size_t, const size_t>& p : nbExecutionPerInstruction) {
+    for (const std::pair<const size_t, const size_t>& p : nbExecutionForEachInstr) {
         this->distribNbExecutionForEachInstrPerInf[p.first][p.second]++;
     }
     for (const TPG::TPGVertex* inferenceTraceVertex : inferenceTrace) {
@@ -192,7 +192,7 @@ const std::map<size_t, double>& TPG::ExecutionStats::getAvgNbExecutionForEachIns
 
 const std::vector<TPG::InferenceTraceStats>& TPG::ExecutionStats::getInferenceTracesStats() const
 {
-    return this->inferenceTracesStats;
+    return this->vecInferenceTraceStats;
 }
 
 const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribNbEvaluatedTeamsPerInf() const
@@ -218,7 +218,7 @@ const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::getDistribNb
 
 void TPG::ExecutionStats::clearInferenceTracesStats()
 {
-    this->inferenceTracesStats.clear();
+    this->vecInferenceTraceStats.clear();
     this->distribNbEvaluatedTeamsPerInf.clear();
     this->distribNbEvaluatedProgramsPerInf.clear();
     this->distribNbExecutedLinesPerInf.clear();
@@ -282,11 +282,11 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
             }
         }
 
-        root["TracesStats"][nbTrace]["nbEvaluatedTeamsPerInf"] = inferenceTraceStats.nbEvaluatedTeamsPerInf;
-        root["TracesStats"][nbTrace]["nbEvaluatedProgramsPerInf"] = inferenceTraceStats.nbEvaluatedProgramsPerInf;
-        root["TracesStats"][nbTrace]["nbExecutedLinesPerInf"] = inferenceTraceStats.nbExecutedLinesPerInf;
-        for (const auto& p : inferenceTraceStats.nbExecutionForEachInstrPerInf)
-            root["TracesStats"][nbTrace]["nbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
+        root["TracesStats"][nbTrace]["nbEvaluatedTeams"] = inferenceTraceStats.nbEvaluatedTeams;
+        root["TracesStats"][nbTrace]["nbEvaluatedPrograms"] = inferenceTraceStats.nbEvaluatedPrograms;
+        root["TracesStats"][nbTrace]["nbExecutedLines"] = inferenceTraceStats.nbExecutedLines;
+        for (const auto& p : inferenceTraceStats.nbExecutionForEachInstr)
+            root["TracesStats"][nbTrace]["nbExecutionForEachInstruction"][std::to_string(p.first)] = p.second;
         i++;
     }
 

@@ -66,14 +66,14 @@ namespace TPG {
         const std::vector<const TPG::TPGVertex*> inferenceTrace;
 
         /// Number of team evaluated.
-        const uint64_t nbEvaluatedTeamsPerInf;
+        const uint64_t nbEvaluatedTeams;
         /// Number of programs evaluated.
-        const uint64_t nbEvaluatedProgramsPerInf;
+        const uint64_t nbEvaluatedPrograms;
         /// Number of program lines executed.
-        const uint64_t nbExecutedLinesPerInf;
+        const uint64_t nbExecutedLines;
         /// Map that associate the instruction indexes with the number of
         /// execution of the corresponding Instruction.
-        const std::map<uint64_t, uint64_t> nbExecutionForEachInstrPerInf;
+        const std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
     };
 
     /**
@@ -138,7 +138,7 @@ namespace TPG {
         /* Analyzed inference traces */
 
         /// Statistics of last analyzed inference traces.
-        std::vector<InferenceTraceStats> inferenceTracesStats;
+        std::vector<InferenceTraceStats> vecInferenceTraceStats;
 
         /* Distributions */
 
@@ -193,12 +193,12 @@ namespace TPG {
          * \brief Analyze a program to get how many times each instruction is
          * used.
          *
-         * \param[out] instructionCounts the std::map<uint64_t, uint64_t>& that
+         * \param[out] nbExecutionForEachInstr the std::map<uint64_t, uint64_t>& that
          * will be incremented for each instruction use.
          * \param[in] program the analyzed program.
          */
         static void analyzeProgram(
-            std::map<uint64_t, uint64_t>& instructionCounts,
+            std::map<uint64_t, uint64_t>& nbExecutionForEachInstr,
             const Program::Program& program);
 
       public:
@@ -228,7 +228,7 @@ namespace TPG {
          * action.
          *
          * Results are stored in a new inferenceTraceStats struct which is pushed back
-         * in attribute inferenceTracesStats. Previous results will be erased.
+         * in attribute vecInferenceTraceStats. Previous results will be erased.
          *
          * \param[in] inferenceTrace a vector<const TPGVertex*> of the analyzed inference
          * trace.
@@ -340,7 +340,7 @@ namespace TPG {
          *              }
          *          },
          *
-         *          "inferenceTracesStats" :
+         *          "vecInferenceTraceStats" :
          *          {
          *              "inferenceTraceNumber" :
          *              {

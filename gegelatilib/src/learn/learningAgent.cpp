@@ -136,11 +136,12 @@ Learn::LearningAgent::evaluateJob(
         // hashes used during TRAINING, left shift is used to avoid hash collisions.
         // This is a customed way to avoid overlapping of TRAINING set (hashes)
         // and VALIDATION set (hashes).
+        uint64_t hash;
         if(mode == LearningMode::VALIDATION) {
             iterationNumber <<= 8; 
-            uint64_t hash = hasher(iterationNumber);
-        }else  {
-            uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+            hash = hasher(iterationNumber);
+        }else{
+            hash = hasher(generationNumber) ^ hasher(iterationNumber);
         }
         
         // Reset the learning Environment
