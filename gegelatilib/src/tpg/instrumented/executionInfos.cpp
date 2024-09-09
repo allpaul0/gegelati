@@ -130,11 +130,12 @@ void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) 
     // Trace infos
     int i = 0;
     for (TPG::InferenceTraceInfos inferenceTraceInfos: this->vecInferenceTraceInfos) {
-        std::string i_str = std::to_string(i);
+        //std::string i_str = std::to_string(i);
+        std::string seed_str = std::to_string(inferenceTraceInfos.seed);
 
-        root[i_str]["seed"] = inferenceTraceInfos.seed;
-        root[i_str]["nbEvaluatedTeams"] = inferenceTraceInfos.nbEvaluatedTeams;
-        root[i_str]["nbEvaluatedPrograms"] = inferenceTraceInfos.nbEvaluatedPrograms;
+        //root[i_str]["seed"] = inferenceTraceInfos.seed;
+        root[seed_str]["nbEvaluatedTeams"] = inferenceTraceInfos.nbEvaluatedTeams;
+        root[seed_str]["nbEvaluatedPrograms"] = inferenceTraceInfos.nbEvaluatedPrograms;
 
         for (const auto& pair : inferenceTraceInfos.nbExecutionForEachInstr) {
             uint64_t key = pair.first;     // The key in the map
@@ -142,7 +143,7 @@ void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) 
 
             std::string key_str = std::to_string(key);
 
-            root[i_str]["nbExecutionForEachInstr"][key_str] = value;
+            root[seed_str]["nbExecutionForEachInstr"][key_str] = value;
         }
         i++;
     }
