@@ -127,22 +127,25 @@ Learn::LearningAgent::evaluateJob(
 
     // Init results
     double result = 0.0;
+    Data::Hash<uint64_t> hasher;
+    //static std::set<uint64_t> hashSet;
 
-    // Evaluate nbIteration times
-    for (uint64_t iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
+
+    // Evaluate nbIterationsPerPolicyEvaluation times
+    // Make sure the hashes used does not overlap, by shifting iterationNumber 
+    // The idea is that hash(2) ^ hash (1) == hash(1) ^ hash(2) (collision)
+    // we take the hypothesis that the generationNumber will not exceed this->params.nbGenerations
+    for (uint64_t iterationNumber = this->params.nbGenerations; iterationNumber < this->params.nbGenerations + params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
      
-        Data::Hash<uint64_t> hasher;
-        // If this is a VALIDATION process, make sure the hash used does not overlap 
-        // hashes used during TRAINING, left shift is used to avoid hash collisions.
-        // This is a customed way to avoid overlapping of TRAINING set (hashes)
-        // and VALIDATION set (hashes).
-        uint64_t hash;
-        if(mode == LearningMode::VALIDATION) {
-            iterationNumber <<= 8; 
-            hash = hasher(iterationNumber);
-        }else{
-            hash = hasher(generationNumber) ^ hasher(iterationNumber);
-        }
+        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+        // std::cout << "gen: " << generationNumber << ", iter: " << iterationNumber << std::endl;
+        // std::cout << hash << std::endl;
+
+        // if (hashSet.count(hash)) {
+        //     std::cerr << "\033[31mCollision in the hashSet\033[0m" << std::endl;
+        // } else {
+        //     hashSet.insert(hash);
+        // }
         
         // Reset the learning Environment
         le.reset(hash, mode);
