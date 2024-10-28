@@ -72,6 +72,8 @@ namespace TPG {
             /// Map that associate the instruction indexes with the number of
             /// execution of the corresponding Instruction.
             const std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
+            /// identifiers for each traversed Team
+            std::list<int> traceTeamIds;
         };
 
      /**
@@ -175,6 +177,20 @@ namespace TPG {
          * the file readable.
          */
         void writeInfosToJson(const char* filePath, bool noIndent = false) const;
+    
+
+        /**
+         * \brief we perfrom a Breadth First Search (BFS) to give a unique identifier 
+         * to every Vertices of a trained TPG. 
+         * This id can latter be used to see the execution trace of the TPG.
+         * id of TPGTeamInstrumented is mutable therefore, this func is const.
+         * 
+         * The BFS algo uses a queue which makes its complexity = O(N)
+         * Reminder: BFS = LEVEL Order traversal 
+         *
+         * \param[in] root Root vertex of the TPG to annotate.
+         */
+        void assignIdentifiers(const TPG::TPGTeamInstrumented* root) const;
     };
 
 } // namespace TPG

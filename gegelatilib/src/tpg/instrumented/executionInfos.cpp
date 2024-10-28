@@ -40,11 +40,13 @@
 #include <json.h>
 #include <numeric>
 #include <vector>
+#include <queue>
+#include <string>
 
 #include "program/program.h"
+#include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/instrumented/tpgVertexInstrumented.h"
 #include "tpg/instrumented/tpgFactoryInstrumented.h"
 
@@ -65,10 +67,18 @@ void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVerte
     uint64_t nbEvaluatedPrograms = 0;
     uint64_t nbExecutedLines = 0;
     std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
+    std::list<int> traceTeamIds;
 
     // For of each visited teams, analysing its edges
     for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamIterator = inferenceTrace.cbegin(); 
         inferenceTraceTeamIterator != inferenceTrace.cend() - 1; inferenceTraceTeamIterator++) {
+
+        // Dereference the iterator to access the actual TPGVertex object
+        const TPG::TPGVertex* vertex = *inferenceTraceTeamIterator;
+
+        // retrieve Team id and add it to the list of traces
+        traceTeamIds.push_back((const TPG::TPGVertexInstrumented*)vertex->getId());
+
         for (const TPG::TPGEdge* edge : (*inferenceTraceTeamIterator)->getOutgoingEdges()) {
   
             // Edges leading to a previously visited teams (including the current team) are not evaluated
@@ -85,7 +95,7 @@ void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVerte
         }
     }
 
-    this->vecInferenceTraceInfos.push_back({seed, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutionForEachInstr});;
+    this->vecInferenceTraceInfos.push_back({seed, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutionForEachInstr, traceTeamIds});
 }
 
 void TPG::ExecutionInfos::analyzeExecution(
@@ -146,28 +156,15 @@ void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) 
             root[seed_str]["nbExecutionForEachInstr"][key_str] = value;
         }
         i++;
-    }
 
-    /*
-    
-    int i = 0;
-    for (TPG::InferenceTraceStats inferenceTraceStats: this->getInferenceTracesStats()) {
-        std::string nbTrace = std::to_string(i);
-
-        if (this->lastAnalyzedGraph != nullptr) {
-            for (int j = 0; j < inferenceTraceStats.inferenceTrace.size(); j++) {
-                root["TracesStats"][nbTrace]["trace"][j] = vertexIndexes[inferenceTraceStats.inferenceTrace[j]];
-            }
+        std::list<int>::iterator it;
+        std::string fullTrace = "";
+        for (it = inferenceTraceInfos.traceTeamIds.begin(); it != inferenceTraceInfos.traceTeamIds.end(); ++it){
+            fullTrace = fullTrace + std::to_string(*it) + ", ";
         }
-
-        root["TracesStats"][nbTrace]["nbEvaluatedTeams"] = inferenceTraceStats.nbEvaluatedTeams;
-        root["TracesStats"][nbTrace]["nbEvaluatedPrograms"] = inferenceTraceStats.nbEvaluatedPrograms;
-        root["TracesStats"][nbTrace]["nbExecutedLines"] = inferenceTraceStats.nbExecutedLines;
-        for (const auto& p : inferenceTraceStats.nbExecutionForEachInstr)
-            root["TracesStats"][nbTrace]["nbExecutionForEachInstruction"][std::to_string(p.first)] = p.second;
-        i++;
+        fullTrace = fullTrace.substr(0, fullTrace.size()-2);
+        root[seed_str]["traceTeamIds"] = fullTrace;
     }
-    */
 
     Json::StreamWriterBuilder writerFactory;
     // Set a precision to 6 digits after the point.
@@ -180,4 +177,38 @@ void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) 
 
     outputFile.close();
     
+}
+
+void TPG::ExecutionInfos::assignIdentifiers(const TPG::TPGTeamInstrumented* root) const{
+
+    // safety check
+    if (root == NULL) 
+        return;
+
+    // Create an empty queue for level order traversal
+    std::queue<const TPG::TPGTeamInstrumented*> q;
+    // Create an empty set to make sure each Vertex is counted only once
+    std::set<const TPG::TPGTeamInstrumented*> s;
+    int currentId = 0;
+
+    q.push(root);
+    s.insert(root);
+
+    while (q.empty() == false) {
+
+        // Assign (could be printed) front of queue and remove it
+        const TPG::TPGTeamInstrumented* vertex = q.front();
+        vertex->setId(currentId++);
+        std::cout << "Id: " << vertex->getId() << ", nbOutGoingEdges: " << vertex->getOutgoingEdges().size() << std::endl;
+        q.pop();
+
+        // Enqueue every child of this team (teams pointed by OutgoingEdges)
+        for (const TPG::TPGEdge* edge: vertex->getOutgoingEdges()){             
+            const TPG::TPGTeamInstrumented* destinationTeam = dynamic_cast<const TPG::TPGTeamInstrumented*>(edge->getDestination());
+            if(destinationTeam && !s.count(destinationTeam)){ // make sure we don't add duplicate in our queue
+                q.push(destinationTeam);
+                s.insert(destinationTeam);
+            }
+        }
+    }
 }
