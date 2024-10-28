@@ -63,13 +63,23 @@ namespace TPG {
          */
         void reset() const;
 
+        /**
+         * \brief Get the unique identifier of the tpgVertexInstrumented
+         */
+        int32_t getId() const;
+
+        /**
+         * \brief set the unique identifier of the tpgVertexInstrumented
+         */
+        void setId(int32_t newId) const;
+
       protected:
         /**
          * \brief Protected default constructor to forbid instanciation.
          *
          * This constructor initializes the instrumentation attributes.
          */
-        TPGVertexInstrumented() : nbVisits{0}
+        TPGVertexInstrumented() : nbVisits{0}, id{-1}
         {
         }
 
@@ -77,6 +87,11 @@ namespace TPG {
         /// Attribute is mutable because all TPGVertex are seen as const outside
         /// from their TPGGraph.
         mutable std::atomic_uint64_t nbVisits;
+
+        /// @brief  Unique identifier of a TPGVertexInstrumented
+        /// used when analyzing the execution Trace of a TPG 
+        /// to understand what the path traversal of the graph was.
+        mutable int32_t id;
     };
 } // namespace TPG
 

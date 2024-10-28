@@ -49,3 +49,13 @@ void TPG::TPGVertexInstrumented::reset() const
 {
     this->nbVisits = 0;
 }
+
+int32_t TPG::TPGVertexInstrumented::getId() const
+{
+    return this->id;
+}
+
+void TPG::TPGVertexInstrumented::setId(int32_t newId) const
+{
+    this->id = newId;
+}
