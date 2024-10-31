@@ -36,6 +36,7 @@
 #ifndef EXECUTION_INFOS_H
 #define EXECUTION_INFOS_H
 
+#include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/tpgGraph.h"
 
@@ -98,6 +99,9 @@ namespace TPG {
 
         /// Analyzed inference traces.
         std::vector<InferenceTraceInfos> vecInferenceTraceInfos;
+
+        /// dictionnary representing the number of programs by team for a given TPG
+        std::map<int, int> nbProgsbyTeam;
 
     protected:
         
@@ -166,8 +170,36 @@ namespace TPG {
         void analyzeExecution(TPG::TPGExecutionEngineInstrumented& tee,
                             const TPGGraph& graph, unsigned int seed);
 
-          /**
-         * \brief ************ TO DO **************
+
+        /**
+         * \brief write TPG structure to a JSON file
+         * For each team of the graph, its number of outgoing edges
+         * \param[in] filePath the path to the output file.
+         * \param[in] noIndent true if the json format must not be indented.
+         * Files can become large quickly with a lot of inferenceTraces, so if the file
+         * will just be analyzed by another program, set this to true to save
+         * some space on your disk. Set noIndent to false if you want to keep
+         * the file readable.
+        */
+        void writeTPGtoJson(const char* filePath, bool noIndent = false) const;
+
+
+        /**
+         * \brief write graph traversal informations about the TPG to a JSON file
+         * "945117276" : //seed
+         *  {
+         *      "nbEvaluatedPrograms" : 15,
+         *      "nbEvaluatedTeams" : 6,
+         *      "nbExecutionForEachInstr" : 
+         *      {
+         *          "0" : 9,
+         *          "1" : 7,
+         *          "2" : 9,
+         *          "3" : 11,
+         *          "4" : 6
+         *      },
+         *      "traceTeamIds" : "0, 1, 2, 4, 9, 7" // order of teams traversed by the TPG
+         *  },
          *
          * \param[in] filePath the path to the output file.
          * \param[in] noIndent true if the json format must not be indented.
@@ -188,9 +220,11 @@ namespace TPG {
          * The BFS algo uses a queue which makes its complexity = O(N)
          * Reminder: BFS = LEVEL Order traversal 
          *
+         * Fills the dictionnary nbProgsbyTeam
+         * 
          * \param[in] root Root vertex of the TPG to annotate.
          */
-        void assignIdentifiers(const TPG::TPGTeamInstrumented* root) const;
+        void assignIdentifiers(const TPG::TPGTeamInstrumented* root);
     };
 
 } // namespace TPG

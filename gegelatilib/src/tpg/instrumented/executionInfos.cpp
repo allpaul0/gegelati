@@ -73,11 +73,8 @@ void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVerte
     for (std::vector<const TPG::TPGVertex *>::const_iterator inferenceTraceTeamIterator = inferenceTrace.cbegin(); 
         inferenceTraceTeamIterator != inferenceTrace.cend() - 1; inferenceTraceTeamIterator++) {
 
-        // Dereference the iterator to access the actual TPGVertex object
-        const TPG::TPGVertex* vertex = *inferenceTraceTeamIterator;
-
         // retrieve Team id and add it to the list of traces
-        traceTeamIds.push_back((const TPG::TPGVertexInstrumented*)vertex->getId());
+        traceTeamIds.push_back(((TPG::TPGTeamInstrumented*) *inferenceTraceTeamIterator)->getId());
 
         for (const TPG::TPGEdge* edge : (*inferenceTraceTeamIterator)->getOutgoingEdges()) {
   
@@ -130,6 +127,28 @@ void TPG::ExecutionInfos::analyzeExecution(
     factoryInstrumented->resetTPGGraphCounters(tpgGraph);
 }
 
+void TPG::ExecutionInfos::writeTPGtoJson(const char* filePath, bool noIndent) const
+{
+    std::ofstream outputFile(filePath);
+
+    Json::Value root;
+
+    for (auto it : this->nbProgsbyTeam) {
+        root["tpg"][std::to_string(it.first)] = it.second;
+    }
+
+    Json::StreamWriterBuilder writerFactory;
+    // Set a precision to 6 digits after the point.
+    writerFactory.settings_["precision"] = 6U;
+    if (noIndent)
+        writerFactory.settings_["indentation"] = "";
+    Json::StreamWriter* writer = writerFactory.newStreamWriter();
+    writer->write(root, &outputFile);
+    delete writer;
+
+    outputFile.close();
+}
+
 void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) const
 {
     
@@ -179,7 +198,7 @@ void TPG::ExecutionInfos::writeInfosToJson(const char* filePath, bool noIndent) 
     
 }
 
-void TPG::ExecutionInfos::assignIdentifiers(const TPG::TPGTeamInstrumented* root) const{
+void TPG::ExecutionInfos::assignIdentifiers(const TPG::TPGTeamInstrumented* root) {
 
     // safety check
     if (root == NULL) 
@@ -200,6 +219,7 @@ void TPG::ExecutionInfos::assignIdentifiers(const TPG::TPGTeamInstrumented* root
         const TPG::TPGTeamInstrumented* vertex = q.front();
         vertex->setId(currentId++);
         std::cout << "Id: " << vertex->getId() << ", nbOutGoingEdges: " << vertex->getOutgoingEdges().size() << std::endl;
+        this->nbProgsbyTeam[vertex->getId()] = vertex->getOutgoingEdges().size();
         q.pop();
 
         // Enqueue every child of this team (teams pointed by OutgoingEdges)
