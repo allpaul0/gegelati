@@ -63,16 +63,18 @@ namespace TPG {
         struct InferenceTraceInfos
         {
             /// The seed corresponding to the inference Trace
-            const uint64_t seed;
+            uint64_t seed;
+            /// data sources from the learning environment, e.g. angle and velocity for pendulum
+            std::vector<double> dataSourcesLE; 
             /// The inference trace.
-            //const std::vector<const TPG::TPGVertex*> inferenceTrace;
+            // std::vector<const TPG::TPGVertex*> inferenceTrace;
             /// Number of team evaluated.      // NbVisits
-            const uint64_t nbEvaluatedTeams; 
+            uint64_t nbEvaluatedTeams; 
             /// Number of programs evaluated.  //NbTraversals
-            const uint64_t nbEvaluatedPrograms;
+            uint64_t nbEvaluatedPrograms;
             /// Map that associate the instruction indexes with the number of
             /// execution of the corresponding Instruction.
-            const std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
+            std::map<uint64_t, uint64_t> nbExecutionForEachInstr;
             /// identifiers for each traversed Team
             std::list<int> traceTeamIds;
         };
@@ -81,9 +83,9 @@ namespace TPG {
      * \brief Utility class for extracting execution informations
      * from a TPGExecutionEngineInstrumented and an instrumented TPGGraph.
      *
-     * ********************** TO DO WRITE THIS **********************
-     * ********************** TO DO WRITE TESTS **********************
-
+     * This class can analyze multiple inference traces and store the results
+     * in a vector of InferenceTraceInfos structs.
+     * It can also export these results to a JSON file.
      *
      * The Json exporter is designed to be used after a call to
      * analyzeExecution(). Just call writeInformationsToJson() to export informations in
@@ -152,8 +154,10 @@ namespace TPG {
          *
          * \param[in] inferenceTrace a vector<const TPGVertex*> of the analyzed inference
          * \param[in] seed the seed that led to an inference trace on the TPGGraph
+         * \param[in] dataSourcesLE the data sources coming from the learning environment
+         * e.g. angle and velocity for pendulum.
          */
-        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace, unsigned int seed);
+        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace, const unsigned int seed, const std::vector<double>& dataSourcesLE);
 
         /**
          * \brief Analyze the execution informations of multiple inferences
@@ -164,11 +168,13 @@ namespace TPG {
          * \param[in] tee the TPGExecutionEngineInstrumented.
          * \param[in] graph the TPGGraph executed with tee.
          * \param[in] seed the seed that led to an inference trace on the TPGGraph
+         * \param[in] dataSourcesLE the data sources coming from the learning environment
+         * e.g. angle and velocity for pendulum. 
          * \throws std::bad_cast if the graph contains a non instrumented vertex
          * or edge.
          */
         void analyzeExecution(TPG::TPGExecutionEngineInstrumented& tee,
-                            const TPGGraph& graph, unsigned int seed);
+                            const TPGGraph& graph, const unsigned int seed, const std::vector<double>& dataSourcesLE);
 
 
         /**
