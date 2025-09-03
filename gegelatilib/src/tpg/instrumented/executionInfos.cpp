@@ -232,3 +232,21 @@ void TPG::ExecutionInfos::assignIdentifiers(const TPG::TPGTeamInstrumented* root
         }
     }
 }
+
+std::vector<TPG::InferenceTraceInfos> TPG::ExecutionInfos::getVecInferenceTraceInfos(void) {
+    return this->vecInferenceTraceInfos;
+}
+
+void TPG::ExecutionInfos::clear() {
+    this->vecInferenceTraceInfos.clear();
+}
+
+void TPG::ExecutionInfos::setVecInferenceTraceInfos(const std::vector<TPG::InferenceTraceInfos>& newVecInferenceTraceInfos)
+{
+    vecInferenceTraceInfos = newVecInferenceTraceInfos; // copy assignement
+}
+
+void TPG::ExecutionInfos::setVecInferenceTraceInfos(std::vector<TPG::InferenceTraceInfos>&& newVecInferenceTraceInfos)
+{
+    vecInferenceTraceInfos = std::move(newVecInferenceTraceInfos); // move assignement
+}
