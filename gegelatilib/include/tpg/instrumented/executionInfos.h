@@ -225,6 +225,40 @@ namespace TPG {
          * \param[in] root Root vertex of the TPG to annotate.
          */
         void assignIdentifiers(const TPG::TPGTeamInstrumented* root);
+
+        /**
+         * \brief getter for vecInferenceTraceInfos
+         */
+        std::vector<TPG::InferenceTraceInfos> getVecInferenceTraceInfos(void);
+
+        /**
+         * \brief clear vector<InferenceTraceInfos> vecInferenceTraceInfos
+         */
+        void clear(void);
+
+        /*
+        * Efficiency:
+        * By providing both const& and && overloads, the class is optimized for both use cases: 
+        * reusing an existing vector (copying) and initializing from temporary vectors (moving).
+        */
+
+        /**
+         * \brief 1st setter for vecInferenceTraceInfos
+         * Copy Assignment:
+         * The 1st setVec takes a const std::vector<TPG::InferenceTraceInfos>&, which allows passing by reference
+         * and copying the data into the internal vector. 
+         * This is useful when you want to retain the original vector outside the class.
+         */
+        void setVecInferenceTraceInfos(const std::vector<TPG::InferenceTraceInfos>& newVecInferenceTraceInfos);
+
+        /**
+         * \brief 2nd setter for vecInferenceTraceInfos
+         * Move Assignment:
+         * The second setVec takes an rvalue reference (std::vector<int>&&) and uses std::move to transfer ownership 
+         * of the data to the internal vector. This avoids an unnecessary copy when the input vector is temporary.
+         */
+        void setVecInferenceTraceInfos(std::vector<TPG::InferenceTraceInfos>&& newVecInferenceTraceInfos);
+
     };
 
 } // namespace TPG
