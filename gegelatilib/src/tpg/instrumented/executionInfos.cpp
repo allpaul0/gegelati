@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
  * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
+ * Paul Allaire <paul.allaire@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -60,7 +61,7 @@ void TPG::ExecutionInfos::analyzeProgram(
     }
 }
 
-void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace, unsigned int seed)
+void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVertex*>& inferenceTrace, const unsigned int seed, const std::vector<double>& dataSourcesLE)
 {
     // Do not count the action vertex at the end
     uint64_t nbEvaluatedTeams = inferenceTrace.size() - 1;
@@ -92,11 +93,11 @@ void TPG::ExecutionInfos::analyzeInferenceTrace(const std::vector<const TPGVerte
         }
     }
 
-    this->vecInferenceTraceInfos.push_back({seed, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutionForEachInstr, traceTeamIds});
+    this->vecInferenceTraceInfos.push_back({seed, dataSourcesLE, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutionForEachInstr, traceTeamIds});
 }
 
 void TPG::ExecutionInfos::analyzeExecution(
-    TPG::TPGExecutionEngineInstrumented& tee, const TPG::TPGGraph& tpgGraph, unsigned int seed)
+    TPG::TPGExecutionEngineInstrumented& tee, const TPG::TPGGraph& tpgGraph, const unsigned int seed, const std::vector<double>& dataSourcesLE)
 {
     // 1. Get nbExecutionForEachInstr, nbEvaluatedTeams, nbEvaluatedPrograms
 
@@ -109,7 +110,7 @@ void TPG::ExecutionInfos::analyzeExecution(
     }
 
     const std::vector<const TPG::TPGVertex*>& inferenceTrace = traceHistory.front();
-    analyzeInferenceTrace(inferenceTrace, seed);
+    analyzeInferenceTrace(inferenceTrace, seed, dataSourcesLE);
         
     // 2. clear Trace History, clear TPGGraph
     // Clear the trace history from all previous inference trace.
