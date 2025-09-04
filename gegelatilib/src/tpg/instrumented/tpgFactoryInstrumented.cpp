@@ -33,31 +33,31 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
-std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
+std::shared_ptr<TPG::TPGGraph> TPG::TPGFactoryInstrumented::createTPGGraph(
     const Environment& env) const
 {
     return std::make_shared<TPG::TPGGraph>(
-        env, std::make_unique<TPGInstrumentedFactory>());
+        env, std::make_unique<TPGFactoryInstrumented>());
 }
 
-TPG::TPGTeam* TPG::TPGInstrumentedFactory::createTPGTeam() const
+TPG::TPGTeam* TPG::TPGFactoryInstrumented::createTPGTeam() const
 {
     return new TPGTeamInstrumented();
 }
 
-TPG::TPGAction* TPG::TPGInstrumentedFactory::createTPGAction(
+TPG::TPGAction* TPG::TPGFactoryInstrumented::createTPGAction(
     const uint64_t id) const
 {
     return new TPGActionInstrumented(id);
 }
 
-std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
+std::unique_ptr<TPG::TPGEdge> TPG::TPGFactoryInstrumented::createTPGEdge(
     const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
@@ -65,19 +65,19 @@ std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
     return ptr;
 }
 
-std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGInstrumentedFactory::
+std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGFactoryInstrumented::
     createTPGExecutionEngine(const Environment& env, Archive* arch) const
 {
     return std::make_unique<TPGExecutionEngineInstrumented>(env, arch);
 }
 
-void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
+void TPG::TPGFactoryInstrumented::resetTPGGraphCounters(
     const TPG::TPGGraph& tpg) const
 {
     // Reset all vertices
     for (const TPG::TPGVertex* vertex : tpg.getVertices()) {
-        const TPG::TPGVertexInstrumentation* vertexI =
-            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+        const TPG::TPGVertexInstrumented* vertexI =
+            dynamic_cast<const TPG::TPGVertexInstrumented*>(vertex);
         if (vertexI != nullptr) {
             vertexI->reset();
         }
@@ -93,7 +93,7 @@ void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
     }
 }
 
-void TPG::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
+void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(
     TPG::TPGGraph& tpg) const
 {
     // Remove unused vertices first
@@ -102,8 +102,8 @@ void TPG::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
     // loop.
     std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
     for (const TPG::TPGVertex* vertex : vertices) {
-        const TPG::TPGVertexInstrumentation* vertexI =
-            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+        const TPG::TPGVertexInstrumented* vertexI =
+            dynamic_cast<const TPG::TPGVertexInstrumented*>(vertex);
         // If the vertex is instrumented AND was never visited
         if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
             // remove it

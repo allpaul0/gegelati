@@ -33,27 +33,66 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_ACTION_INSTRUMENTED_H
-#define TPG_ACTION_INSTRUMENTED_H
+#ifndef TPG_VERTEX_INSTRUMENTED_H
+#define TPG_VERTEX_INSTRUMENTED_H
 
-#include "tpg/instrumented/tpgVertexInstrumented.h"
-#include "tpg/tpgAction.h"
+#include <atomic>
+#include <cstddef>
 
 namespace TPG {
-
     /**
-     * \brief Instrumented TPGAction
+     * \brief Instrumentation code for TPGVertex class for instrumented
+     * execution.
      */
-    class TPGActionInstrumented : public TPG::TPGAction,
-                                  public TPG::TPGVertexInstrumented
+    class TPGVertexInstrumented
     {
       public:
-        /// Main constructor for TPGActionInstrumented.
-        /// see TPGAction constructor for more details.
-        TPGActionInstrumented(const uint64_t id) : TPGAction(id)
+        /**
+         * \brief Get the number of time a TPGVertexInstrumented was visited.
+         */
+        uint64_t getNbVisits() const;
+
+        /**
+         * \brief Add one to the number of visits for this
+         * TPGVertexInstrumented.
+         */
+        void incrementNbVisits() const;
+
+        /**
+         *  \brief Reset the instrumentation attributes.
+         */
+        void reset() const;
+
+        /**
+         * \brief Get the unique identifier of the tpgVertexInstrumented
+         */
+        int32_t getId() const;
+
+        /**
+         * \brief set the unique identifier of the tpgVertexInstrumented
+         */
+        void setId(int32_t newId) const;
+
+      protected:
+        /**
+         * \brief Protected default constructor to forbid instanciation.
+         *
+         * This constructor initializes the instrumentation attributes.
+         */
+        TPGVertexInstrumented() : nbVisits{0}, id{-1}
         {
         }
+
+        /// Number of a time a TPGVertex has been visited
+        /// Attribute is mutable because all TPGVertex are seen as const outside
+        /// from their TPGGraph.
+        mutable std::atomic_uint64_t nbVisits;
+
+        /// @brief  Unique identifier of a TPGVertexInstrumented
+        /// used when analyzing the execution Trace of a TPG 
+        /// to understand what the path traversal of the graph was.
+        mutable int32_t id;
     };
 } // namespace TPG
 
-#endif
+#endif // !TPG_VERTEX_INSTRUMENTED_H

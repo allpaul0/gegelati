@@ -45,9 +45,9 @@
 
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "tpg/instrumented/tpgVertexInstrumented.h"
 #include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
 
@@ -609,7 +609,7 @@ TEST_F(LearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-// Same as previous, but with a TPGInstrumentedFactory
+// Same as previous, but with a TPGFactoryInstrumented
 TEST_F(LearningAgentTest, TrainInstrumented)
 {
     params.archiveSize = 50;
@@ -625,7 +625,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
 
-    Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
+    Learn::LearningAgent la(le, set, params, TPG::TPGFactoryInstrumented());
 
     la.init();
     bool alt = false;
@@ -660,7 +660,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     }
     for(auto vert: tpg.getVertices()){
         std::cout<<dynamic_cast<const
-    TPG::TPGVertexInstrumentation*>(vert)->getNbVisits()<<std::endl;
+    TPG::TPGVertexInstrumented*>(vert)->getNbVisits()<<std::endl;
     }*/
 
     // Check number of visits of a few edges & vertices
@@ -685,12 +685,12 @@ TEST_F(LearningAgentTest, TrainInstrumented)
         4);
 
     auto& verticesIterator = tpg.getVertices();
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumented*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
               3327);
 
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumented*>(
                   verticesIterator.at(5))
                   ->getNbVisits(),
               63);

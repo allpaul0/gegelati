@@ -74,12 +74,12 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
 }
 
 const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
-    TPGExecutionEngineInstrumented::getTraceHistory() const
+    TPGExecutionEngineInstrumented::getInferenceTraceHistory() const
 {
     return this->traceHistory;
 }
 
-void TPG::TPGExecutionEngineInstrumented::clearTraceHistory()
+void TPG::TPGExecutionEngineInstrumented::clearInferenceTraceHistory()
 {
     this->traceHistory.clear();
 }

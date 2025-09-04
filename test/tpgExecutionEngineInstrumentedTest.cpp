@@ -53,7 +53,7 @@
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgFactoryInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
 #ifndef PARAM_FLOAT_PRECISION
@@ -112,7 +112,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
         tpg = new TPG::TPGGraph(
-            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
+            *e, std::make_unique<TPG::TPGFactoryInstrumented>());
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
@@ -278,19 +278,19 @@ TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
     TPG::TPGExecutionEngineInstrumented tpeei(*e);
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
     result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
     result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
 
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 2)
         << "Wrong number of recorded traces.";
-    ASSERT_EQ(result, tpeei.getTraceHistory().at(0))
+    ASSERT_EQ(result, tpeei.getInferenceTraceHistory().at(0))
         << "Recorded trace is different from result trace.";
 
-    ASSERT_NO_THROW(tpeei.clearTraceHistory())
+    ASSERT_NO_THROW(tpeei.clearInferenceTraceHistory())
         << "Clearing trace history failed unexpectedly.";
-    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+    ASSERT_EQ(tpeei.getInferenceTraceHistory().size(), 0)
         << "Trace history isn't empty after clear.";
 }
