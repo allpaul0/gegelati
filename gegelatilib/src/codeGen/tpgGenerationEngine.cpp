@@ -70,9 +70,7 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
              << ".\n"
              << " */\n\n";
 
-    fileMain << "#include \"" << filename << ".h\"" << std::endl;
-    fileMain << "#include \"" << filename << "_" << filenameProg << ".h\""
-             << std::endl;
+    fileMain << "#include \"" << filename << ".h\"\n" << std::endl;
 
     fileMainH << "/**\n"
               << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
@@ -82,6 +80,8 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
               << " */\n\n";
     fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
     fileMainH << "#define C_" << filename << "_H\n" << std::endl;
+    fileMainH << "#include \"" << filename << "_" << filenameProg << ".h\"\n"
+             << std::endl;
 };
 
 CodeGen::TPGGenerationEngine::~TPGGenerationEngine()

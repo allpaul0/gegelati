@@ -188,15 +188,6 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 void CodeGen::TPGSwitchGenerationEngine::initTpgFile()
 {
     fileMain
-        << "#include <limits.h>\n"
-        << "#include <assert.h>\n"
-        << "#include <float.h>\n"
-        << "#include <stdbool.h>\n"
-        << "#include <stdio.h>\n"
-        << "#include <stdint.h>\n"
-        << "#include <math.h>\n"
-        << "\n"
-
         << "int bestProgram(double *results, int nb) {\n"
         << "\tint bestProgram = 0;\n"
         << "\tdouble bestScore = (isnan(results[0]))? -INFINITY : results[0];\n"
@@ -214,7 +205,16 @@ void CodeGen::TPGSwitchGenerationEngine::initTpgFile()
 }
 void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {
-    fileMainH << "#include <stdlib.h>\n\n";
+    fileMainH << "#include <stdlib.h>\n"
+        << "#include <limits.h>\n"
+        << "#include <assert.h>\n"
+        << "#include <float.h>\n"
+        << "#include <stdbool.h>\n"
+        << "#include <stdio.h>\n"
+        << "#include <stdint.h>\n"
+        << "#include <math.h>\n"
+        << "\n";
+    fileMainH << "#include \"externHeader.h\"\n" << std::endl;
 
     fileMainH << "void inferenceTPG(double* actions);\n" << std::endl;
 }

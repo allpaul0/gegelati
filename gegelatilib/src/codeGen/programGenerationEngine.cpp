@@ -220,10 +220,10 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
           << ".\n"
           << " */\n\n";
 
-    fileC << "#include \"" << filename << ".h\"" << std::endl;
+    fileC << "#include \"" << filename << ".h\"\n" << std::endl;
     fileH << "#ifndef C_" << filename << "_H" << std::endl;
     fileH << "#define C_" << filename << "_H\n" << std::endl;
-    fileC << "#include \"externHeader.h\"" << std::endl;
+    fileH << "#include \"externHeader.h\"\n" << std::endl;
 #ifdef DEBUG
     fileC << "#include <stdio.h>" << std::endl;
 #endif // DEBUG
