@@ -38,6 +38,11 @@
 #include "program/programExecutionEngine.h"
 #include "program/line.h"
 
+#ifdef DEBUG_PROGRAM_EXCEPTIONS
+// add compile time warning if DEBUG_PROGRAM_EXCEPTIONS is defined
+#warning "DEBUG_PROGRAM_EXCEPTIONS is defined: program execution will be slower"
+#endif
+
 void Program::ProgramExecutionEngine::executeCurrentLine()
 {
     std::vector<Data::UntypedSharedPtr> operands;
@@ -46,8 +51,23 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
     const Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction();
+    #ifdef DEBUG_PROGRAM_EXCEPTIONS
+    printf("instr: %lu,", line.getInstructionIndex());
+    #endif
     this->fetchCurrentOperands(operands);
-
+    #ifdef DEBUG_PROGRAM_EXCEPTIONS
+    // print operands values
+    printf(" operands:");
+    for (auto& op : operands) {
+        const double* val = op.getSharedPointer<const double>().get();
+        if (val != nullptr) {
+            printf(" %f", *val);
+        } else {
+            printf("nullptr");
+        }
+    }
+    printf("\n");
+    #endif
     double result = instruction.execute(operands);
 
     this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
