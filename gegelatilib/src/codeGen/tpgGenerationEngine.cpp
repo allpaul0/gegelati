@@ -80,12 +80,18 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
               << " */\n\n";
     fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
     fileMainH << "#define C_" << filename << "_H\n" << std::endl;
+    fileMainH << "#ifdef __cplusplus" << std::endl;
+    fileMainH << "extern \"C\" {" << std::endl;
+    fileMainH << "#endif\n" << std::endl;
     fileMainH << "#include \"" << filename << "_" << filenameProg << ".h\"\n"
              << std::endl;
 };
 
 CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
 {
+    fileMainH << "#ifdef __cplusplus" << std::endl; 
+    fileMainH << "}" << std::endl;
+    fileMainH << "#endif\n" << std::endl;
     fileMainH << "\n#endif" << std::endl;
     fileMain.close();
     fileMainH.close();
