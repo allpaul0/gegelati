@@ -67,6 +67,13 @@ else()
         message(STATUS "Code generation module of GEGELATI is disabled.")
 endif()
 
+# Enable optional debug for program exceptions
+option(DEBUG_PROGRAM_EXCEPTIONS "Enable debug exceptions" OFF)
+if(DEBUG_PROGRAM_EXCEPTIONS)
+    target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE -DDEBUG_PROGRAM_EXCEPTIONS)
+    message(STATUS "DEBUG_PROGRAM_EXCEPTIONS enabled: program execution will be slower.")
+endif()
+
 
 # Within this project, you can link to this library by just specifing the name
 # of the target, i.e. ${LIBRARY_TARGET_NAME} = LibTemplateCMake. It is useful,
