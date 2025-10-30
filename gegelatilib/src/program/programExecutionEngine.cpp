@@ -41,6 +41,12 @@
 #ifdef DEBUG_PROGRAM_EXCEPTIONS
 // add compile time warning if DEBUG_PROGRAM_EXCEPTIONS is defined
 #warning "DEBUG_PROGRAM_EXCEPTIONS is defined: program execution will be slower"
+
+#include <sstream>
+#include <iostream>
+#include <mutex>
+
+static std::mutex printMutex;
 #endif
 
 void Program::ProgramExecutionEngine::executeCurrentLine()
@@ -49,24 +55,29 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
     // Get everything needed (may throw)
     const Line& line = this->getCurrentLine();
-    const Instructions::Instruction& instruction =
-        this->getCurrentInstruction();
-    #ifdef DEBUG_PROGRAM_EXCEPTIONS
-    printf("instr: %lu,", line.getInstructionIndex());
-    #endif
+    const Instructions::Instruction& instruction = this->getCurrentInstruction();
     this->fetchCurrentOperands(operands);
     #ifdef DEBUG_PROGRAM_EXCEPTIONS
+    // declare string stream to store debug info
+    std::ostringstream oss;
+    oss << "instr: " << line.getInstructionIndex() << ",";
+    
     // print operands values
-    printf(" operands:");
+    oss << " operands:";
     for (auto& op : operands) {
         const double* val = op.getSharedPointer<const double>().get();
         if (val != nullptr) {
-            printf(" %f", *val);
+            oss << " " << *val;
         } else {
-            printf("nullptr");
+            oss << "nullptr";
         }
     }
-    printf("\n");
+    oss << "\n";
+
+    {
+        std::lock_guard<std::mutex> lock(printMutex);
+        std::cout << oss.str();
+    }
     #endif
     double result = instruction.execute(operands);
 
