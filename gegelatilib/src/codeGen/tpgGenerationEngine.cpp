@@ -92,7 +92,7 @@ CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
     fileMainH << "#ifdef __cplusplus" << std::endl; 
     fileMainH << "}" << std::endl;
     fileMainH << "#endif\n" << std::endl;
-    fileMainH << "\n#endif" << std::endl;
+    fileMainH << "#endif" << std::endl;
     fileMain.close();
     fileMainH.close();
 }
