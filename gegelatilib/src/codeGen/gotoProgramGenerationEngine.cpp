@@ -62,11 +62,12 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
 
 CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
 {
-    fileH << "\n#endif" << std::endl;
-    fileH.close();
-    // Prevent the base destructor from writing a second #endif and closing
-    // fileH again.  We redirect fileH to a null state by calling close() —
-    // subsequent close() or << calls on a closed ofstream are no-ops.
+    if (fileH.is_open()) {
+        fileH << "\n#endif // GEGELATI_GENERATED\n" << std::flush;
+        fileH.close();
+        // Tell the base class not to emit another #endif.
+        this->headerClosed = true;
+    }
 }
 
 // ============================================================
@@ -97,6 +98,9 @@ void CodeGen::GotoProgramGenerationEngine::openGotoFile(
           << "\n"
           << "#include \"externHeader.h\"\n"
           << "\n";
+
+    fileH.flush(); // ensure header prologue is on disk before any redirections
+
 }
 
 // ============================================================
@@ -140,6 +144,11 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
         fileH << "};\n";
     }
 
+    // flush both streams then redirect fileC's buffer to fileH's buffer so the
+    // output lands in the header.  Flushing prevents interleaving/corruption.
+    fileH.flush();
+    fileC.flush();
+
     // -- Program lines --
     // generateCurrentLine() writes to fileC.  We redirect fileC's underlying
     // buffer to fileH's buffer so the output lands in the header.
@@ -152,6 +161,8 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
 
     // Restore fileC's buffer (even though we never actually write to it).
     cAsOstream.rdbuf(savedCBuf);
+    fileC.flush();
+    fileH.flush();
 
     // -- Return --
     fileH << "\treturn reg[0];\n}\n";

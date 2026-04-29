@@ -96,6 +96,9 @@ namespace CodeGen {
 
         ///  Utility class used to print data accesses in generated code.
         Data::DataHandlerPrinter dataPrinter;
+    
+        // true when a derived class already closed the header guard and fileH
+        bool headerClosed = false;
 
       public:
         /// inherited from Program::ProgramEngine
@@ -160,12 +163,7 @@ namespace CodeGen {
          *
          * Close both files and add endif at the end of the generated header.
          */
-        ~ProgramGenerationEngine()
-        {
-            fileH << "#endif" << std::endl;
-            fileC.close();
-            fileH.close();
-        }
+        ~ProgramGenerationEngine();
 
         /**
          * \brief Generate the current line of the program.
