@@ -40,6 +40,7 @@
 #include "codeGen/tpgGenerationEngineFactory.h"
 #include "codeGen/tpgStackGenerationEngine.h"
 #include "codeGen/tpgSwitchGenerationEngine.h"
+#include "codeGen/tpgGoToGenerationEngine.h"
 
 CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory()
     : TPGGenerationEngineFactory(switchMode){};
@@ -60,6 +61,9 @@ std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
     }
     else if (this->mode == switchMode) {
         return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);
+    }
+    else if (this->mode == gotoMode) {
+        return std::make_unique<TPGGoToGenerationEngine>(filename, tpg, path);
     }
     else {
         return nullptr;

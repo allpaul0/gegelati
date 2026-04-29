@@ -55,7 +55,8 @@ namespace CodeGen {
         enum generationEngineMode
         {
             stackMode,
-            switchMode
+            switchMode,
+            gotoMode
         };
 
         /**

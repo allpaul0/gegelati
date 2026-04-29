@@ -1,0 +1,143 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2025) :
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
+#ifdef CODE_GENERATION
+#ifndef TPG_GOTO_GENERATION_ENGINE_H
+#define TPG_GOTO_GENERATION_ENGINE_H
+
+#include "codeGen/gotoProgramGenerationEngine.h"
+#include "codeGen/tpgGenerationEngine.h"
+
+namespace CodeGen {
+
+/**
+ * \brief Generation engine producing a TPG inference function that uses
+ *        GCC computed-goto dispatch (&&label / goto *ptr) instead of the
+ *        traditional while(1)+switch structure.
+ *
+ * Generated TPG.c structure:
+ *  - static inline bestProgram() helper,
+ *  - inferenceTPG(fixedpt *actions, const fixedpt * restrict in1, …) body,
+ *  - a static const jump_table[] of &&label addresses,
+ *  - per-team L_T<id>: { … goto *jump_table[next[best]]; } blocks,
+ *  - per-action L_A<id>: actions[0] = <id>; return; lines.
+ *
+ * Generated _program.h: all programs as
+ *   inline __attribute__((always_inline)) fixedpt P<id>(const fixedpt * restrict in1, …)
+ *
+ * Note: TPGGenerationEngine holds a ProgramGenerationEngine member
+ * (progGenerationEngine).  This engine shadows it with its own
+ * GotoProgramGenerationEngine member (gotoProg) and uses gotoProg
+ * exclusively — the inherited progGenerationEngine is constructed but
+ * never used.
+ */
+class TPGGoToGenerationEngine : public TPGGenerationEngine
+{
+  public:
+    /**
+     * \brief Constructor.
+     *
+     * \param filename  Base name for the generated .c/.h files.
+     * \param tpg       The TPG graph to generate code for.
+     * \param path      Output directory (trailing '/' required).
+     */
+    TPGGoToGenerationEngine(const std::string& filename,
+                            const TPG::TPGGraph& tpg,
+                            const std::string& path = "./");
+
+    /**
+     * \brief Destructor — base class handles closing fileMain/fileMainH.
+     */
+    ~TPGGoToGenerationEngine() = default;
+
+    /**
+     * \brief Top-level entry point: generates the complete TPG .c/.h pair.
+     */
+    void generateTPGGraph() override;
+
+  protected:
+    /**
+     * \brief Emits  `P<id>`(in1, in2, in3, in4)  into fileMain and triggers
+     *        program code generation into _program.h if not yet emitted.
+     */
+    void generateEdge(const TPG::TPGEdge& edge) override;
+
+    /**
+     * \brief Emits the `L_T<id>`: { static next[]; scores[]; … dispatch } block.
+     */
+    void generateTeam(const TPG::TPGTeam& team) override;
+
+    /**
+     * \brief Emits  `L_A id`: actions[0] = id; return;
+     */
+    void generateAction(const TPG::TPGAction& action) override;
+
+    /**
+     * \brief Returns "T<vertexID>" for teams, "A<actionID>" for actions.
+     */
+    std::string vertexName(const TPG::TPGVertex& v);
+
+  private:
+    /**
+     * \brief Writes bestProgram() helper and opens inferenceTPG() with the
+     *        jump_table[] and initial goto into fileMain.
+     */
+    void initTpgFile() override;
+
+    /**
+     * \brief Writes #includes, NB_TEAMS macro, and inferenceTPG declaration
+     *        into fileMainH.
+     */
+    void initHeaderFile() override;
+
+    /**
+     * \brief Returns the jump_table[] index for a vertex.
+     *
+     * Teams are ordered first (indices 0…nbTeams-1), then actions.
+     */
+    int jumpTableIndex(const TPG::TPGVertex& v) const;
+
+    /// Goto-specific program engine (shadows the inherited progGenerationEngine).
+    GotoProgramGenerationEngine gotoProg;
+
+    /// Ordered vertex list (teams first, then actions) built in generateTPGGraph().
+    std::vector<const TPG::TPGVertex*> orderedVertices;
+
+    /// Number of input-array parameters passed to every program.
+    static constexpr int NB_INPUTS = 4;
+};
+
+} // namespace CodeGen
+
+#endif // TPG_GOTO_GENERATION_ENGINE_H
+#endif // CODE_GENERATION
