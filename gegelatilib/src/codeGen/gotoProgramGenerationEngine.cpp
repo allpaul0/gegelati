@@ -64,7 +64,7 @@ CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
     // if (fileH.is_open() && !headerClosed) {
     //     // explicit sync before the #endif, in case any buffered
     //     // content from a prior rdbuf redirect is still pending. ***
-    //     fileH.flush();
+        fileH.flush();
         fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
         fileH << "\n#endif\n" << std::flush;
         // fileH.flush();  // ensure #endif reaches the file before close()
@@ -176,21 +176,21 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     // this redirect their output lands directly in fileH.
     // We must use static_cast<std::ostream&> because std::ofstream::rdbuf()
     // is a const getter — the two-argument setter lives on std::ostream.
-    fileH.flush();
-    fileC.flush();
-    std::ostream& cBase      = fileC;
-    std::streambuf* savedBuf = cBase.rdbuf(fileH.rdbuf());
+    // fileH.flush();
+    // fileC.flush();
+    // std::ostream& cBase      = fileC;
+    // std::streambuf* savedBuf = cBase.rdbuf(fileH.rdbuf());
 
-    iterateThroughtProgram(ignoreException);
+    // iterateThroughtProgram(ignoreException);
 
-    // flush via the shared streambuf before restoring, so no
-    // bytes written through fileC remain in the buffer when fileH
-    // reclaims exclusive ownership.
-    fileC.flush();
+    // // flush via the shared streambuf before restoring, so no
+    // // bytes written through fileC remain in the buffer when fileH
+    // // reclaims exclusive ownership.
+    // fileC.flush();
 
-    // Restore fileC's buffer so /dev/null receives any stray future writes.
-    cBase.rdbuf(savedBuf);
-    fileH.flush();
+    // // Restore fileC's buffer so /dev/null receives any stray future writes.
+    // cBase.rdbuf(savedBuf);
+    // fileH.flush();
 
     // -- Return --
     fileH << "\treturn reg[0];\n}\n";
