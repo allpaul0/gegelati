@@ -292,6 +292,8 @@ CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
     }
     if (fileC.is_open()) fileC.close();
     if (fileH.is_open()) fileH.close();
+
+    headerClosed = true;
 }
 
 #endif // CODE_GENERATION

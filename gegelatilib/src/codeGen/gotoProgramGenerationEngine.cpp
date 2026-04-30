@@ -61,7 +61,7 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
 
 CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
 {
-    if (fileH.is_open()) {
+    if (fileH.is_open() && !headerClosed) {
         // explicit sync before the #endif, in case any buffered
         // content from a prior rdbuf redirect is still pending. ***
         fileH.flush();

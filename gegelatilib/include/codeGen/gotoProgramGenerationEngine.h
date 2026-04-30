@@ -93,7 +93,7 @@ class GotoProgramGenerationEngine : public ProgramGenerationEngine
      * the base destructor does not emit a second guard, then closes fileH.
      * fileC (opened on /dev/null) is closed by the base destructor.
      */
-    ~GotoProgramGenerationEngine();
+    ~GotoProgramGenerationEngine() override;
 
     /**
      * \brief Generates one inline program function into fileH.
