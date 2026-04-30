@@ -287,6 +287,7 @@ CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
 {
     // Write the trailing guard only if a derived class didn't already do it
     if (fileH.is_open() && !headerClosed) {
+        fileH << "DESTRUCTOR PROGRAMGENERATIONENGINE" << std::endl;
         fileH << "#endif" << std::endl;
     }
     if (fileC.is_open()) fileC.close();

@@ -65,6 +65,7 @@ CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
         // explicit sync before the #endif, in case any buffered
         // content from a prior rdbuf redirect is still pending. ***
         fileH.flush();
+        fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
         fileH << "\n#endif\n" << std::flush;
         fileH.flush();  // ensure #endif reaches the file before close()
         fileH.close();
@@ -99,6 +100,7 @@ void CodeGen::GotoProgramGenerationEngine::openGotoFile(
 
     fileH << "#ifndef C_" << filename << "_H\n"
           << "#define C_" << filename << "_H\n"
+          << "HELLO OPENGOTOFILE GOTOPROGGENENGINE\n"
           << "\n"
           << "#include \"externHeader.h\"\n"
           << "\n";
