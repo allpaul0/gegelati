@@ -51,7 +51,7 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     //   1. Close and rewrite fileH with the goto-style prologue.
     //   2. Open fileC on /dev/null so iterateThroughtProgram() always has a
     //      valid stream buffer to redirect away from.
-    fileH.close();
+    //fileH.close();
     openGotoFile(filename, path, env.getParams().nbProgramConstant);
 }
 
