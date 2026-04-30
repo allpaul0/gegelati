@@ -43,33 +43,39 @@ namespace CodeGen {
  * \brief Specialisation of ProgramGenerationEngine for the computed-goto
  *        dispatch style.
  *
- * Differences from the base class:
+ * Key design decisions driven by the base class implementation:
  *
- *  1. Every program is emitted as a header-only inline function in the
- *     *_program.h file (fileH). The .c file (fileC) is opened but unused,
- *     because ProgramGenerationEngine's constructor always opens both.
- *     The function signature is:
+ *  1. ProgramGenerationEngine::openFile() no longer opens fileC (it is
+ *     commented out in the current source), so fileC is always in a
+ *     closed/invalid state.  generateCurrentLine() and
+ *     initOperandCurrentLine() both write to fileC, so we must open a
+ *     real sink for fileC before calling iterateThroughtProgram(); we use
+ *     a platform-null device (/dev/null on POSIX) for this purpose.
  *
- *       inline __attribute__((always_inline))
- *       fixedpt P<id>(const fixedpt * restrict in1, …, const fixedpt * restrict inN)
+ *  2. All program bodies must land in fileH (header-only, so GCC can
+ *     inline them).  We achieve this by redirecting fileC's stream buffer
+ *     to fileH's buffer while iterateThroughtProgram() runs, then
+ *     restoring it afterwards.  The redirect uses std::ostream::rdbuf()
+ *     on the std::ostream base of fileC (std::ofstream::rdbuf() is
+ *     const; the base class two-argument form is what we need).
  *
- *  2. Data sources map to function parameters ("inN") rather than global
- *     extern pointers.  getNameSourceData() is non-virtually shadowed to
- *     achieve this — the base class method is not virtual.
+ *  3. getNameSourceData() is shadowed (not overridden — base is not
+ *     virtual) so that data-source indices map to function parameters
+ *     "inN" instead of global extern pointers.  Callers must hold a
+ *     GotoProgramGenerationEngine* for dispatch to work correctly.
  *
- *  3. generateProgram() is non-virtually shadowed: it writes the inline
- *     function body directly to fileH rather than fileC.
+ *  4. generateProgram() is likewise shadowed to emit
+ *     "inline __attribute__((always_inline)) fixedpt P<id>(...)" into
+ *     fileH instead of the base "double P<id>()" into fileC.
  *
- *  Note: because ProgramGenerationEngine does not declare its key methods
- *  as virtual, this class shadows (rather than overrides) them. Callers
- *  must hold a GotoProgramGenerationEngine* (or reference) — not a base
- *  pointer — for the correct methods to be dispatched.
+ *  5. The destructor sets headerClosed = true before the base destructor
+ *     runs, preventing a double "#endif" in the output file.
  */
 class GotoProgramGenerationEngine : public ProgramGenerationEngine
 {
   public:
     /**
-     * \param filename   Base name; the engine writes to <filename>_program.h.
+     * \param filename   Base name; the engine writes to <filename>.h.
      * \param env        The GEGELATI Environment (registers, constants, …).
      * \param path       Output directory (trailing '/' required).
      * \param nbInputs   Number of "const fixedpt * restrict inN" parameters
@@ -81,21 +87,24 @@ class GotoProgramGenerationEngine : public ProgramGenerationEngine
                                 int nbInputs = 4);
 
     /**
-     * \brief Destructor — writes the e n d i f (Doxygen is fucking dumb) guard and closes fileH.
-     *        fileC is closed by the base destructor (it was opened but never
-     *        written to).
+     * \brief Destructor.
+     *
+     * Writes the closing #endif guard into fileH, marks headerClosed so
+     * the base destructor does not emit a second guard, then closes fileH.
+     * fileC (opened on /dev/null) is closed by the base destructor.
      */
     ~GotoProgramGenerationEngine();
 
     /**
      * \brief Generates one inline program function into fileH.
      *
-     * Shadows (does NOT override) ProgramGenerationEngine::generateProgram().
-     * Callers must use a GotoProgramGenerationEngine reference.
+     * Shadows ProgramGenerationEngine::generateProgram() — callers must
+     * use a GotoProgramGenerationEngine* or reference.
      *
-     * Signature produced:
-     *   inline __attribute__((always_inline))
-     *   fixedpt P<progID>(const fixedpt * restrict in1, …)
+     * While the program lines are being generated (iterateThroughtProgram)
+     * the stream buffer of fileC is temporarily redirected to fileH so
+     * that generateCurrentLine() / initOperandCurrentLine() output lands
+     * in the header.
      *
      * \param progID          Unique identifier for the program.
      * \param ignoreException Forwarded to iterateThroughtProgram().
@@ -104,10 +113,12 @@ class GotoProgramGenerationEngine : public ProgramGenerationEngine
 
   protected:
     /**
-     * \brief Returns the C name for a data source, mapping inputs to
-     *        function parameters "inN" instead of global extern pointers.
+     * \brief Maps data-source indices to function parameter names.
      *
-     * Shadows (does NOT override) ProgramGenerationEngine::getNameSourceData().
+     * Shadows ProgramGenerationEngine::getNameSourceData().
+     *  idx == 0                        → "reg"
+     *  idx == 1, nbProgramConstant > 0 → "cst"
+     *  otherwise                       → "in1", "in2", …
      */
     std::string getNameSourceData(const uint64_t& idx);
 
@@ -116,9 +127,9 @@ class GotoProgramGenerationEngine : public ProgramGenerationEngine
     int nbInputs;
 
     /**
-     * \brief Opens _program.h, writes include guard + externHeader include.
-     *        Also opens (but will not write to) _program.c so that the base
-     *        class destructor can close it safely.
+     * \brief Re-initialises fileH with the goto-style header prologue and
+     *        opens fileC on /dev/null so iterateThroughtProgram() has a
+     *        valid (but discarded) sink before the redirect is installed.
      *
      * Called from the constructor after the base class has run so we can
      * replace the header content with the goto-style version.

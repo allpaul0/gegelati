@@ -43,15 +43,14 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     const std::string& path, int nbInputs)
     : ProgramGenerationEngine(filename, env, path), nbInputs(nbInputs)
 {
-    // The base class constructor has already called openFile(), which:
-    //   - opened fileC  ( filename _program.c)  — we will not write to it
-    //   - opened fileH  ( filename _program.h)  — we rewrite it below
-    //   - wrote global extern declarations into fileC
-    //   - wrote include guards + externHeader into fileH
+    // After the base constructor:
+    //   - fileH is open and contains the standard header prologue.
+    //   - fileC is NOT open (openFile() has its fileC.open() commented out).
     //
-    // We close fileH and reopen it with our goto-style header content.
-    // fileC is left open (but empty of useful content); the base destructor
-    // will close it.
+    // We must:
+    //   1. Close and rewrite fileH with the goto-style prologue.
+    //   2. Open fileC on /dev/null so iterateThroughtProgram() always has a
+    //      valid stream buffer to redirect away from.
     fileH.close();
     openGotoFile(filename, path, env.getParams().nbProgramConstant);
 }
@@ -63,11 +62,12 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
 CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
 {
     if (fileH.is_open()) {
-        fileH << "\n#endif // GEGELATI_GENERATED\n" << std::flush;
+        fileH << "\n#endif\n" << std::flush;
         fileH.close();
-        // Tell the base class not to emit another #endif.
-        this->headerClosed = true;
     }
+    // Tell the base destructor not to emit another #endif / close fileH again.
+    headerClosed = true;
+    // fileC (/dev/null) will be closed by the base destructor.
 }
 
 // ============================================================
@@ -99,8 +99,20 @@ void CodeGen::GotoProgramGenerationEngine::openGotoFile(
           << "#include \"externHeader.h\"\n"
           << "\n";
 
-    fileH.flush(); // ensure header prologue is on disk before any redirections
-
+    // --- Open fileC on the null device so it has a valid buffer ---
+    // generateCurrentLine() and initOperandCurrentLine() write to fileC; we
+    // redirect its buffer to fileH while those run, but the buffer pointer
+    // must be non-null (i.e. fileC must be successfully opened) for rdbuf()
+    // on the std::ostream base to work.
+#if defined(_WIN32) || defined(_WIN64)
+    fileC.open("NUL", std::ofstream::out);
+#else
+    fileC.open("/dev/null", std::ofstream::out);
+#endif
+    if (!fileC.is_open()) {
+        throw std::runtime_error(
+            "GotoProgramGenerationEngine: cannot open null device for fileC");
+    }
 }
 
 // ============================================================
@@ -144,24 +156,20 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
         fileH << "};\n";
     }
 
-    // flush both streams then redirect fileC's buffer to fileH's buffer so the
-    // output lands in the header.  Flushing prevents interleaving/corruption.
+    // Redirect fileC's stream buffer to fileH's buffer.
+    // generateCurrentLine() / initOperandCurrentLine() write to fileC; with
+    // this redirect their output lands directly in fileH.
+    // We must use static_cast<std::ostream&> because std::ofstream::rdbuf()
+    // is a const getter — the two-argument setter lives on std::ostream.
     fileH.flush();
     fileC.flush();
-
-    // -- Program lines --
-    // generateCurrentLine() writes to fileC.  We redirect fileC's underlying
-    // buffer to fileH's buffer so the output lands in the header.
-    // std::ofstream inherits rdbuf(streambuf*) from std::ostream, so we cast
-    // to the base to access the two-argument form.
-    std::ostream& cAsOstream  = static_cast<std::ostream&>(fileC);
-    std::streambuf* savedCBuf = cAsOstream.rdbuf(fileH.rdbuf());
+    std::ostream& cBase      = static_cast<std::ostream&>(fileC);
+    std::streambuf* savedBuf = cBase.rdbuf(fileH.rdbuf());
 
     iterateThroughtProgram(ignoreException);
 
-    // Restore fileC's buffer (even though we never actually write to it).
-    cAsOstream.rdbuf(savedCBuf);
-    fileC.flush();
+    // Restore fileC's buffer so /dev/null receives any stray future writes.
+    cBase.rdbuf(savedBuf);
     fileH.flush();
 
     // -- Return --
