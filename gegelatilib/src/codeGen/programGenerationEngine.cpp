@@ -40,8 +40,7 @@
 #include "util/timestamp.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
-const std::regex CodeGen::ProgramGenerationEngine::constant_regex(
-    "(\\%[0-9]*)");
+const std::regex CodeGen::ProgramGenerationEngine::constant_regex("(\\%[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
@@ -180,13 +179,13 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant)
         i = 1;
     }
 
-    // for (int cpt = 1; i < this->dataScsConstsAndRegs.size(); ++i, ++cpt) {
+    for (int cpt = 1; i < this->dataScsConstsAndRegs.size(); ++i, ++cpt) {
 
-    //     const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-    //     std::string type = dataPrinter.getDemangleTemplateType(d);
+        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
+        std::string type = dataPrinter.getDemangleTemplateType(d);
 
-    //     fileC << "extern " << type << "* in" << cpt << ";" << std::endl;
-    // }
+        fileC << "extern " << type << "* in" << cpt << ";" << std::endl;
+    }
 }
 
 void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
@@ -197,25 +196,25 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
     }
-    //this->fileC.open(path + filename + ".c", std::ofstream::out);
+    this->fileC.open(path + filename + ".c", std::ofstream::out);
     this->fileH.open(path + filename + ".h", std::ofstream::out);
 
-    // if (!fileC.is_open() || !fileH.is_open()) {
-    //     throw std::runtime_error("Error can't open " +
-    //                              std::string(path + filename) + ".c or " +
-    //                              std::string(path + filename) + ".h");
-    // }
+    if (!fileC.is_open() || !fileH.is_open()) {
+        throw std::runtime_error("Error can't open " +
+                                 std::string(path + filename) + ".c or " +
+                                 std::string(path + filename) + ".h");
+    }
     if (!fileH.is_open()) {
         throw std::runtime_error("Error can't open " +
                                  std::string(path + filename) + ".h");
     }
 
-    // fileC << "/**\n"
-    //       << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
-    //       << " * On the " << Util::getCurrentDate() << "\n"
-    //       << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
-    //       << ".\n"
-    //       << " */\n\n";
+    fileC << "/**\n"
+          << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+          << " * On the " << Util::getCurrentDate() << "\n"
+          << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+          << ".\n"
+          << " */\n\n";
 
     fileH << "/**\n"
           << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
@@ -286,15 +285,15 @@ void CodeGen::ProgramGenerationEngine::processLine()
 CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
 {
     // Write the trailing guard only if a derived class didn't already do it
-    if (fileH.is_open() && !headerClosed) {
-        fileH.flush();
+    // if (fileH.is_open() && !headerClosed) {
+    //     fileH.flush();
         fileH << "DESTRUCTOR PROGRAMGENERATIONENGINE" << std::endl;
         fileH << "#endif" << std::endl;
-    }
+    // }
     if (fileC.is_open()) fileC.close();
     if (fileH.is_open()) fileH.close();
 
-    headerClosed = true;
+    // headerClosed = true;
 }
 
 #endif // CODE_GENERATION

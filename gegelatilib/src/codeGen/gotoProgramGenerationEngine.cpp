@@ -52,7 +52,7 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     //   2. Open fileC on /dev/null so iterateThroughtProgram() always has a
     //      valid stream buffer to redirect away from.
     //fileH.close();
-    openGotoFile(filename, path, env.getParams().nbProgramConstant);
+    // openGotoFile(filename, path, env.getParams().nbProgramConstant);
 }
 
 // ============================================================
@@ -61,17 +61,17 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
 
 CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
 {
-    if (fileH.is_open() && !headerClosed) {
-        // explicit sync before the #endif, in case any buffered
-        // content from a prior rdbuf redirect is still pending. ***
-        fileH.flush();
+    // if (fileH.is_open() && !headerClosed) {
+    //     // explicit sync before the #endif, in case any buffered
+    //     // content from a prior rdbuf redirect is still pending. ***
+    //     fileH.flush();
         fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
         fileH << "\n#endif\n" << std::flush;
-        fileH.flush();  // ensure #endif reaches the file before close()
-        fileH.close();
-    }
+        // fileH.flush();  // ensure #endif reaches the file before close()
+    //     fileH.close();
+    // }
     // Tell the base destructor not to emit another #endif / close fileH again.
-    headerClosed = true;
+    // headerClosed = true;
     // fileC (/dev/null) will be closed by the base destructor.
 }
 
@@ -110,7 +110,7 @@ void CodeGen::GotoProgramGenerationEngine::openGotoFile(
     // userspace buffer when generateProgram() later installs the
     // rdbuf redirect, which would allow subsequent writes through
     // fileC to be serialised before the prologue in the output file. ***
-    fileH.flush();
+    // fileH.flush();
 
     // --- Open fileC on the null device so it has a valid buffer ---
     // generateCurrentLine() and initOperandCurrentLine() write to fileC; we
@@ -126,6 +126,8 @@ void CodeGen::GotoProgramGenerationEngine::openGotoFile(
         throw std::runtime_error(
             "GotoProgramGenerationEngine: cannot open null device for fileC");
     }
+
+    // No global variables to initialize in goto-style generation.
 }
 
 // ============================================================
@@ -176,7 +178,7 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     // is a const getter — the two-argument setter lives on std::ostream.
     fileH.flush();
     fileC.flush();
-    std::ostream& cBase      = static_cast<std::ostream&>(fileC);
+    std::ostream& cBase      = fileC;
     std::streambuf* savedBuf = cBase.rdbuf(fileH.rdbuf());
 
     iterateThroughtProgram(ignoreException);
@@ -184,7 +186,7 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     // flush via the shared streambuf before restoring, so no
     // bytes written through fileC remain in the buffer when fileH
     // reclaims exclusive ownership.
-    static_cast<std::ostream&>(fileC).flush();
+    fileC.flush();
 
     // Restore fileC's buffer so /dev/null receives any stray future writes.
     cBase.rdbuf(savedBuf);
