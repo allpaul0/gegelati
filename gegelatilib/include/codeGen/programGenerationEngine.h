@@ -163,7 +163,7 @@ namespace CodeGen {
          *
          * Close both files and add endif at the end of the generated header.
          */
-        ~ProgramGenerationEngine();
+        virtual ~ProgramGenerationEngine();
 
         /**
          * \brief Generate the current line of the program.
