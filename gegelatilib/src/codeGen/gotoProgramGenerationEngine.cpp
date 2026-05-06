@@ -52,7 +52,7 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     //   2. Open fileC on /dev/null so iterateThroughtProgram() always has a
     //      valid stream buffer to redirect away from.
     //fileH.close();
-    // openGotoFile(filename, path, env.getParams().nbProgramConstant);
+    openGotoFile(filename, path, env.getParams().nbProgramConstant);
 }
 
 // ============================================================

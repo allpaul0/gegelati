@@ -45,7 +45,7 @@ CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
 {
     // No additional initialization needed here since the base class constructor
-}//(filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS)
+}
 
 // ============================================================
 // generateTPGGraph

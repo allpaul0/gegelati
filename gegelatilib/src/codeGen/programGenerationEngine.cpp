@@ -228,6 +228,7 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
           << " * On the " << Util::getCurrentDate() << "\n"
           << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
           << ".\n"
+          << "PROGGENENGINE\n"
           << " */\n\n";
 
     //fileC << "#include \"" << filename << ".h\"\n" << std::endl;
