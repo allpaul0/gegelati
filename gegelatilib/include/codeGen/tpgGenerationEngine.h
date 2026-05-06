@@ -86,7 +86,7 @@ namespace CodeGen {
          * Keeping this ProgramGenerationEngine as an attribute avoids wasting
          * time rebuilding a new one for each edge.
          */
-        CodeGen::ProgramGenerationEngine progGenerationEngine;
+        std::unique_ptr<CodeGen::ProgramGenerationEngine> progGenerationEngine;
 
         /**
          * \brief function printing generic code in the main file.
@@ -121,7 +121,8 @@ namespace CodeGen {
          */
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
-                            const std::string& path = "./");
+                            const std::string& path = "./",
+                            std::unique_ptr<CodeGen::ProgramGenerationEngine> progGenEngine = nullptr);
 
         /**
          * \brief destructor of the class.

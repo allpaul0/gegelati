@@ -133,15 +133,6 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
      */
     int jumpTableIndex(const TPG::TPGVertex& v) const;
 
-    /**
-     * \brief Goto-specific program engine.
-     *
-     * Shadows (does not replace) the inherited progGenerationEngine.
-     * Must be a concrete GotoProgramGenerationEngine* so that the
-     * shadowed generateProgram() / getNameSourceData() are dispatched.
-     */
-    GotoProgramGenerationEngine gotoProg;
-
     /// Ordered vertex list (teams first, then actions) built in generateTPGGraph().
     std::vector<const TPG::TPGVertex*> orderedVertices;
 

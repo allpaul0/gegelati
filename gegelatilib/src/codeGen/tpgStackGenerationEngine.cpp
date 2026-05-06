@@ -60,10 +60,10 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
 
-    progGenerationEngine.setProgram(p);
+    progGenerationEngine->setProgram(p);
 
     if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false);
+        progGenerationEngine->generateProgram(progID, false);
     }
 
     std::string destinationName;

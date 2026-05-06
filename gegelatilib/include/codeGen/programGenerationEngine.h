@@ -124,12 +124,8 @@ namespace CodeGen {
          */
         ProgramGenerationEngine(const std::string& filename,
                                 const Environment& env,
-                                const std::string& path = "./")
-            : ProgramEngine(env), dataPrinter()
-        {
-            openFile(filename, path, env.getParams().nbProgramConstant);
-        }
-
+                                const std::string& path = "./");
+        
         /**
          * \brief Constructor of the class
          *
@@ -153,8 +149,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(p), dataPrinter()
         {
-            openFile(filename, path,
-                     p.getEnvironment().getParams().nbProgramConstant);
+            openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
             setProgram(p);
         }
 

@@ -40,16 +40,12 @@
 // ============================================================
 
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
-    const std::string& filename, const TPG::TPGGraph& tpg,
-    const std::string& path)
-    : TPGGenerationEngine(filename, tpg, path),
-      // Construct our own GotoProgramGenerationEngine for _program.h output.
-      // The base class already built progGenerationEngine for the same file
-      // name; gotoProg will overwrite that header with the goto-style version.
-      gotoProg(filename + "_" + filenameProg, tpg.getEnvironment(), path,
-               NB_INPUTS)
+    const std::string& filename, const TPG::TPGGraph& tpg, const std::string& path)
+    : TPGGenerationEngine(filename, tpg, path, std::make_unique<CodeGen::GotoProgramGenerationEngine>(
+        filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
 {
-}
+    // No additional initialization needed here since the base class constructor
+}//(filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS)
 
 // ============================================================
 // generateTPGGraph
@@ -197,12 +193,11 @@ void CodeGen::TPGGoToGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
 
-    // Use gotoProg (the typed member) so the shadowed generateProgram() and
-    // getNameSourceData() are called — not the base-class versions.
-    gotoProg.setProgram(p);
+
+    progGenerationEngine->setProgram(p);
 
     if (findProgramID(p, progID)) {
-        gotoProg.generateProgram(progID, false);
+        progGenerationEngine->generateProgram(progID, false);
     }
 
     // Emit the call with all input pointers.

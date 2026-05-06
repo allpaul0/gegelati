@@ -42,50 +42,56 @@
 #include "data/demangle.h"
 #include "util/timestamp.h"
 
-CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
-                                                  const TPG::TPGGraph& tpg,
-                                                  const std::string& path)
-    : TPGAbstractEngine(tpg),
-      progGenerationEngine{filename + "_" + filenameProg, tpg.getEnvironment(),
-                           path}
+CodeGen::TPGGenerationEngine::TPGGenerationEngine(
+    const std::string& filename, const TPG::TPGGraph& tpg,
+    const std::string& path, std::unique_ptr<ProgramGenerationEngine> progGenEngine)
+    : TPGAbstractEngine(tpg), progGenerationEngine{std::move(progGenEngine)}
 {
-    if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
-        !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
-        throw std::runtime_error("Code gen is not available for continuous "
-                                 "case with no action programs");
+    {
+        if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
+            !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
+            throw std::runtime_error("Code gen is not available for continuous "
+                                    "case with no action programs");
+        }
+
+        this->fileMain.open(path + filename + ".c", std::ofstream::out);
+        this->fileMainH.open(path + filename + ".h", std::ofstream::out);
+        if (!fileMain.is_open() || !fileMainH.is_open()) {
+            throw std::runtime_error("Error can't open " +
+                                    std::string(path + filename) + ".c or " +
+                                    std::string(path + filename) + ".h");
+        }
+
+        fileMain << "/**\n"
+                << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+                << " * On the " << Util::getCurrentDate() << "\n"
+                << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+                << ".\n"
+                << " */\n\n";
+
+        fileMain << "#include \"" << filename << ".h\"\n" << std::endl;
+
+        fileMainH << "/**\n"
+                << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+                << " * On the " << Util::getCurrentDate() << "\n"
+                << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+                << ".\n"
+                << " */\n\n";
+        fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
+        fileMainH << "#define C_" << filename << "_H\n" << std::endl;
+        fileMainH << "#ifdef __cplusplus" << std::endl;
+        fileMainH << "extern \"C\" {" << std::endl;
+        fileMainH << "#endif\n" << std::endl;
+        fileMainH << "#include \"" << filename << "_" << filenameProg << ".h\"\n"
+                << std::endl;
     }
-
-    this->fileMain.open(path + filename + ".c", std::ofstream::out);
-    this->fileMainH.open(path + filename + ".h", std::ofstream::out);
-    if (!fileMain.is_open() || !fileMainH.is_open()) {
-        throw std::runtime_error("Error can't open " +
-                                 std::string(path + filename) + ".c or " +
-                                 std::string(path + filename) + ".h");
-    }
-
-    fileMain << "/**\n"
-             << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
-             << " * On the " << Util::getCurrentDate() << "\n"
-             << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
-             << ".\n"
-             << " */\n\n";
-
-    fileMain << "#include \"" << filename << ".h\"\n" << std::endl;
-
-    fileMainH << "/**\n"
-              << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
-              << " * On the " << Util::getCurrentDate() << "\n"
-              << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
-              << ".\n"
-              << " */\n\n";
-    fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
-    fileMainH << "#define C_" << filename << "_H\n" << std::endl;
-    fileMainH << "#ifdef __cplusplus" << std::endl;
-    fileMainH << "extern \"C\" {" << std::endl;
-    fileMainH << "#endif\n" << std::endl;
-    fileMainH << "#include \"" << filename << "_" << filenameProg << ".h\"\n"
-             << std::endl;
 };
+
+// CodeGen::TPGGenerationEngine::TPGGenerationEngine(
+//     const std::string& filename, const TPG::TPGGraph& tpg,
+//     const std::string& path, std::unique_ptr<ProgramGenerationEngine> progGenEngine)
+//     : TPGGenerationEngine(filename, tpg, path, std::make_unique<ProgramGenerationEngine>(
+//               filename + "_" + filenameProg, tpg.getEnvironment(), path)) {}
 
 CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
 {

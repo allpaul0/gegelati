@@ -45,12 +45,12 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
 
-    progGenerationEngine.setProgram(p);
+    progGenerationEngine->setProgram(p);
 
     bool isDestinationAnAction = false;
 
     if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false);
+        progGenerationEngine->generateProgram(progID, false);
     }
 
     if (this->tpg.getEnvironment().getNbContinuousActions() > 0 &&

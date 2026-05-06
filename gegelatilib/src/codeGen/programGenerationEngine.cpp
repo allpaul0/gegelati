@@ -46,6 +46,13 @@ const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
+CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
+    const std::string& filename, const Environment& env, const std::string& path)
+    : ProgramEngine(env), dataPrinter()
+{
+    openFile(filename, path, env.getParams().nbProgramConstant);
+}
+
 void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 {
     const Instructions::Instruction& instruction =
