@@ -237,7 +237,6 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
           << " * On the " << Util::getCurrentDate() << "\n"
           << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
           << ".\n"
-          << "PROGGENENGINE\n"
           << " */\n\n";
 
     //fileC << "#include \"" << filename << ".h\"\n" << std::endl;
@@ -306,7 +305,6 @@ CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
     // Write the trailing guard only if a derived class didn't already do it
     // if (fileH.is_open() && !headerClosed) {
         fileH.flush();
-        fileH << "DESTRUCTOR PROGRAMGENERATIONENGINE" << std::endl;
         fileH << "#endif" << std::endl;
     // }
     if (fileC.is_open()) fileC.close();

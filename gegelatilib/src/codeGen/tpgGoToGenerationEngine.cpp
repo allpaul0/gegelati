@@ -68,7 +68,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
         }
     }
 
-    progGenerationEngine->openFile(progGenerationEngine->filename + "_" + filenameProg, progGenerationEngine->path, this->tpg.getEnvironment().getParams().nbProgramConstant);
+    progGenerationEngine->openFile(progGenerationEngine->filename, progGenerationEngine->path, this->tpg.getEnvironment().getParams().nbProgramConstant);
     // setprogram
 
     initHeaderFile();

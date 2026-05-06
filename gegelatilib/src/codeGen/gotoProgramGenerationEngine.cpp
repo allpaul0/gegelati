@@ -64,9 +64,9 @@ CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
     // if (fileH.is_open() && !headerClosed) {
     //     // explicit sync before the #endif, in case any buffered
     //     // content from a prior rdbuf redirect is still pending. ***
-        fileH.flush();
-        fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
-        fileH << "\n#endif\n" << std::flush;
+        // fileH.flush();
+        // fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
+        // fileH << "\n#endif\n" << std::flush;
         // fileH.flush();  // ensure #endif reaches the file before close()
     //     fileH.close();
     // }
@@ -131,7 +131,7 @@ void CodeGen::GotoProgramGenerationEngine::openFile(
 }
 
 // ============================================================
-// generateProgram  (shadows, does not override, the base method)
+// generateProgram overrides base method to emit inline function into fileH
 // ============================================================
 
 void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
@@ -174,8 +174,6 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     // Redirect fileC's stream buffer to fileH's buffer.
     // generateCurrentLine() / initOperandCurrentLine() write to fileC; with
     // this redirect their output lands directly in fileH.
-    // We must use static_cast<std::ostream&> because std::ofstream::rdbuf()
-    // is a const getter — the two-argument setter lives on std::ostream.
     fileH.flush();
     fileC.flush();
     
@@ -198,7 +196,7 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
 }
 
 // ============================================================
-// getNameSourceData  (shadows the base method)
+// getNameSourceData overrides base method to map data source indices to parameter names
 // ============================================================
 
 std::string CodeGen::GotoProgramGenerationEngine::getNameSourceData(
