@@ -142,6 +142,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
 
 void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 {
+    initGlobalVar(nbConstant);
+
     initTpgFile();
     initHeaderFile();
 

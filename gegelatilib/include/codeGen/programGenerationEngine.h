@@ -100,6 +100,9 @@ namespace CodeGen {
         // true when a derived class already closed the header guard and fileH
         bool headerClosed = false;
 
+        // true when global variables are used to access data sources
+        bool globalVarsUsed = false;
+
       public:
         /// inherited from Program::ProgramEngine
         virtual void processLine() override;
@@ -121,10 +124,16 @@ namespace CodeGen {
          * \param[in] path a const reference to the path in which the file must
          * be generated. By default, the file is generated in the current
          * directory.
+         * 
+         * \param[in] globalVarUsed a boolean indicating whether the generated code
+         * should use global variables to access data sources. If false, the generated 
+         * code will access data sources through function parameters instead.
+         * 
          */
         ProgramGenerationEngine(const std::string& filename,
                                 const Environment& env,
-                                const std::string& path = "./");
+                                const std::string& path = "./",
+                                bool globalVarUsed = true);
         
         /**
          * \brief Constructor of the class
@@ -143,15 +152,15 @@ namespace CodeGen {
          *
          * \param[in] path const reference to the path in which the file is
          * generated
+         * 
+         * \param[in] globalVarUsed a boolean indicating whether the generated code
+         * should use global variables to access data sources. If false, the generated 
+         * code will access data sources through function parameters instead.
          */
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
-                                const std::string& path = "./")
-            : ProgramEngine(p), dataPrinter()
-        {
-            openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
-            setProgram(p);
-        }
+                                const std::string& path = "./",
+                                bool globalVarUsed = true);
 
         /**
          * \brief Destructor of the class

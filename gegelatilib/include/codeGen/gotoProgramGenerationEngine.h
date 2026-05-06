@@ -79,12 +79,14 @@ namespace CodeGen {
        * \param filename   Base name; the engine writes to <filename>.h.
        * \param env        The GEGELATI Environment (registers, constants, …).
        * \param path       Output directory (trailing '/' required).
+       * \param globalVarUsed Whether to use global variables to access data sources
        * \param nbInputs   Number of "const fixedpt * restrict inN" parameters
        *                   (default 4).
        */
       GotoProgramGenerationEngine(const std::string& filename,
                                   const Environment& env,
                                   const std::string& path = "./",
+                                  bool globalVarUsed = false,
                                   int nbInputs = 4);
 
       /**

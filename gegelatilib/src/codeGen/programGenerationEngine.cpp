@@ -47,10 +47,18 @@ const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
-    const std::string& filename, const Environment& env, const std::string& path)
+    const std::string& filename, const Environment& env, const std::string& path, bool globalVarUsed = true)
     : ProgramEngine(env), dataPrinter()
 {
     openFile(filename, path, env.getParams().nbProgramConstant);
+}
+
+CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
+    const std::string& filename, const Program::Program& p, const std::string& path = "./", bool globalVarUsed = true) 
+    : ProgramEngine(p), dataPrinter()
+{
+    openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
+    setProgram(p);
 }
 
 void CodeGen::ProgramGenerationEngine::generateCurrentLine()
@@ -238,7 +246,9 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
 #ifdef DEBUG
     //fileC << "#include <stdio.h>" << std::endl;
 #endif // DEBUG
-    initGlobalVar(nbConstant);
+    if(globalVarsUsed){
+        initGlobalVar(nbConstant);
+    }
 }
 
 void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
