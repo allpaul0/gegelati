@@ -47,14 +47,14 @@ const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
-    const std::string& filename, const Environment& env, const std::string& path, bool globalVarUsed = true)
+    const std::string& filename, const Environment& env, const std::string& path, bool globalVarUsed)
     : ProgramEngine(env), dataPrinter()
 {
     openFile(filename, path, env.getParams().nbProgramConstant);
 }
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
-    const std::string& filename, const Program::Program& p, const std::string& path = "./", bool globalVarUsed = true) 
+    const std::string& filename, const Program::Program& p, const std::string& path, bool globalVarUsed) 
     : ProgramEngine(p), dataPrinter()
 {
     openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
