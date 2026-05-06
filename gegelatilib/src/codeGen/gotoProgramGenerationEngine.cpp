@@ -100,7 +100,6 @@ void CodeGen::GotoProgramGenerationEngine::openFile(
 
     fileH << "#ifndef C_" << filename << "_H\n"
           << "#define C_" << filename << "_H\n"
-          << "HELLO OPENGOTOFILE GOTOPROGGENENGINE\n"
           << "\n"
           << "#include \"externHeader.h\"\n"
           << "\n";

@@ -305,7 +305,7 @@ CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
     // Write the trailing guard only if a derived class didn't already do it
     // if (fileH.is_open() && !headerClosed) {
         fileH.flush();
-        fileH << "#endif" << std::endl;
+        fileH << "\n#endif" << std::endl;
     // }
     if (fileC.is_open()) fileC.close();
     if (fileH.is_open()) fileH.close();

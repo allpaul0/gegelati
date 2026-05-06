@@ -68,8 +68,9 @@ void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
         }
     }
 
-    progGenerationEngine->openFile(progGenerationEngine->filename, progGenerationEngine->path, this->tpg.getEnvironment().getParams().nbProgramConstant);
-    // setprogram
+    progGenerationEngine->openFile(progGenerationEngine->filename, 
+        progGenerationEngine->path, 
+        this->tpg.getEnvironment().getParams().nbProgramConstant);
 
     initHeaderFile();
     initTpgFile(); // bestProgram() + inferenceTPG() opening + jump_table
