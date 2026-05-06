@@ -41,18 +41,24 @@
 
 #include "codeGen/tpgStackGenerationEngine.h"
 
+
 CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(
-    const std::string& filename, const TPG::TPGGraph& tpg,
+    const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path)
-    : TPGGenerationEngine(filename, tpg, path)
+    : TPGGenerationEngine(filename, tpg, path, 
+        std::make_unique<CodeGen::ProgramGenerationEngine>(
+            filename + "_" + filenameProg, tpg.getEnvironment(), path, true))
 {
+     // No additional initialization needed here since the base class constructor
+     // already initializes the ProgramGenerationEngine.
 }
+
 
 CodeGen::TPGStackGenerationEngine::~TPGStackGenerationEngine()
 {
-    fileMainH << "\n#endif" << std::endl;
-    fileMain.close();
-    fileMainH.close();
+    // fileMainH << "\n#endif" << std::endl;
+    // fileMain.close();
+    // fileMainH.close();
 }
 
 void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)

@@ -40,8 +40,10 @@
 // ============================================================
 
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
-    const std::string& filename, const TPG::TPGGraph& tpg, const std::string& path)
-    : TPGGenerationEngine(filename, tpg, path, std::make_unique<CodeGen::GotoProgramGenerationEngine>(
+    const std::string& filename, const TPG::TPGGraph& tpg, 
+    const std::string& path)
+    : TPGGenerationEngine(filename, tpg, path, 
+        std::make_unique<CodeGen::GotoProgramGenerationEngine>(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
 {
     // No additional initialization needed here since the base class constructor
@@ -143,7 +145,8 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
     // ---- initial dispatch to root ----
     const auto& root = *tpg.getRootVertices().at(0);
     fileMain
-        << "    /* Initial dispatch — always start at " << vertexName(root) << " */\n"
+        << "    /* Initial dispatch — always start at " << vertexName(root) 
+        << " */\n"
         << "    goto *jump_table[" << jumpTableIndex(root) << "];"
         << "   /* == &&L_" << vertexName(root) << " */\n"
         << "\n"

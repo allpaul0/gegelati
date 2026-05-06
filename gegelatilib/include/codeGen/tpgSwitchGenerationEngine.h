@@ -95,15 +95,14 @@ namespace CodeGen {
          */
         TPGSwitchGenerationEngine(const std::string& filename,
                                   const TPG::TPGGraph& tpg,
-                                  const std::string& path = "./")
-            : TPGGenerationEngine(filename, tpg, path){};
+                                  const std::string& path = "./");
 
         /**
          * \brief destructor of the class.
          *
          * add endif at the end of the header and close both file.
          */
-        // ~TPGSwitchGenerationEngine() : ~TPGGenerationEngine() {};
+        ~TPGSwitchGenerationEngine() override;
 
         /**
          * \brief function that creates the C files required to execute the TPG

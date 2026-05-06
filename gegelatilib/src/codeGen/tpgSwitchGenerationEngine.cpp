@@ -40,6 +40,20 @@
 
 #include "codeGen/tpgSwitchGenerationEngine.h"
 
+CodeGen::TPGSwitchGenerationEngine::TPGSwitchGenerationEngine(
+    const std::string& filename, const TPG::TPGGraph& tpg, 
+    const std::string& path)
+    : TPGGenerationEngine(filename, tpg, path, 
+        std::make_unique<CodeGen::ProgramGenerationEngine>(
+            filename + "_" + filenameProg, tpg.getEnvironment(), path, true))
+{
+     // No additional initialization needed here since the base class constructor
+     // already initializes the ProgramGenerationEngine.
+}
+
+CodeGen::TPGSwitchGenerationEngine::~TPGSwitchGenerationEngine(){}
+
+
 void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();

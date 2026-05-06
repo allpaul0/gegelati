@@ -41,7 +41,7 @@
 CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     const std::string& filename, const Environment& env,
     const std::string& path, bool globalVarUsed, int nbInputs)
-    : ProgramGenerationEngine(filename, env, path, globalVarsUsed), nbInputs(nbInputs)
+    : ProgramGenerationEngine(filename, env, path, false), nbInputs(nbInputs)
 {
     // After the base constructor:
     //   - fileH is open and contains the standard header prologue.

@@ -47,7 +47,8 @@ const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
-    const std::string& filename, const Environment& env, const std::string& path, bool globalVarUsed)
+    const std::string& filename, const Environment& env, 
+    const std::string& path, bool globalVarUsed)
     : ProgramEngine(env), dataPrinter()
 {
     this->filename = filename;
@@ -56,7 +57,8 @@ CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
 }
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
-    const std::string& filename, const Program::Program& p, const std::string& path, bool globalVarUsed) 
+    const std::string& filename, const Program::Program& p, 
+    const std::string& path, bool globalVarUsed) 
     : ProgramEngine(p), dataPrinter()
 {
     setProgram(p);

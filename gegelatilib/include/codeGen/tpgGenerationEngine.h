@@ -122,7 +122,8 @@ namespace CodeGen {
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
-                            std::unique_ptr<CodeGen::ProgramGenerationEngine> progGenEngine = nullptr);
+                            std::unique_ptr<CodeGen::ProgramGenerationEngine> 
+                              progGenEngine = nullptr);
 
         /**
          * \brief destructor of the class.

@@ -101,7 +101,7 @@ namespace CodeGen {
         bool headerClosed = false;
 
         // true when global variables are used to access data sources
-        bool globalVarsUsed = false;
+        bool globalVarsUsed = true;
 
       public:
 
