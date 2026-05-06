@@ -50,14 +50,15 @@ CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
     const std::string& filename, const Environment& env, const std::string& path, bool globalVarUsed)
     : ProgramEngine(env), dataPrinter()
 {
-    openFile(filename, path, env.getParams().nbProgramConstant);
+    this->filename = filename;
+    this->path = path;
+    this->globalVarsUsed = globalVarUsed;
 }
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
     const std::string& filename, const Program::Program& p, const std::string& path, bool globalVarUsed) 
     : ProgramEngine(p), dataPrinter()
 {
-    openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
     setProgram(p);
 }
 

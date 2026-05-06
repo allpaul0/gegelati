@@ -68,6 +68,9 @@ void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
         }
     }
 
+    progGenerationEngine->openFile(progGenerationEngine->filename + "_" + filenameProg, progGenerationEngine->path, this->tpg.getEnvironment().getParams().nbProgramConstant);
+    // setprogram
+
     initHeaderFile();
     initTpgFile(); // bestProgram() + inferenceTPG() opening + jump_table
 
@@ -192,7 +195,6 @@ void CodeGen::TPGGoToGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
-
 
     progGenerationEngine->setProgram(p);
 

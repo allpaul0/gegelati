@@ -104,6 +104,13 @@ namespace CodeGen {
         bool globalVarsUsed = false;
 
       public:
+
+        /// filename of the generated file, without path and suffix
+        std::string filename;
+
+        /// path to the folder in which the file are generated, with trailing '/'
+        std::string path;
+
         /// inherited from Program::ProgramEngine
         virtual void processLine() override;
 
@@ -197,8 +204,24 @@ namespace CodeGen {
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
          */
-        void generateProgram(uint64_t progID,
+        virtual void generateProgram(uint64_t progID,
                              const bool ignoreException = false);
+
+
+        /**
+         * \brief Function used to open the file that is generated.
+         *
+         * This is function is called in both constructor of the class. It open
+         * the source file and the header file. It also adds the include guards
+         * in the header.
+         *
+         * \param[in] filename const reference to the name of the file.
+         * \param[in] path const reference to the path of the file.
+         * \param[in] nbConstant number of constant used in the program of the
+         * TPG.
+         */
+        virtual void openFile(const std::string& filename, const std::string& path,
+                      size_t nbConstant);
 
       protected:
         /**
@@ -231,21 +254,6 @@ namespace CodeGen {
             const Instructions::Instruction& instruction) const;
 
         /**
-         * \brief Function used to open the file that is generated.
-         *
-         * This is function is called in both constructor of the class. It open
-         * the source file and the header file. It also adds the include guards
-         * in the header.
-         *
-         * \param[in] filename const reference to the name of the file.
-         * \param[in] path const reference to the path of the file.
-         * \param[in] nbConstant number of constant used in the program of the
-         * TPG.
-         */
-        void openFile(const std::string& filename, const std::string& path,
-                      size_t nbConstant);
-
-        /**
          * \brief Function called to generate the initialization of all operands
          * of an instruction.
          *
@@ -263,7 +271,7 @@ namespace CodeGen {
          * \return the name of the variable to use to access the data source in
          * the generated program
          */
-        std::string getNameSourceData(const uint64_t& idx);
+        virtual std::string getNameSourceData(const uint64_t& idx);
     };
 
 } // namespace CodeGen

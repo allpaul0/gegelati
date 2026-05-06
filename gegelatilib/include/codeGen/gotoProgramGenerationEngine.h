@@ -112,7 +112,7 @@ namespace CodeGen {
        * \param progID          Unique identifier for the program.
        * \param ignoreException Forwarded to iterateThroughtProgram().
        */
-      void generateProgram(uint64_t progID, bool ignoreException);
+      void generateProgram(uint64_t progID, bool ignoreException) override;
 
     protected:
       /**
@@ -123,7 +123,7 @@ namespace CodeGen {
        *  idx == 1, nbProgramConstant > 0 → "cst"
        *  otherwise                       → "in1", "in2", …
        */
-      std::string getNameSourceData(const uint64_t& idx);
+      std::string getNameSourceData(const uint64_t& idx) override;
 
     private:
       /// Number of "const fixedpt * restrict inN" parameters.
@@ -141,8 +141,9 @@ namespace CodeGen {
        * \param path      Output directory.
        * \param nbConstant Number of program constants (used for include guard).
        */
-      void openGotoFile(const std::string& filename, const std::string& path,
-                        size_t nbConstant);
+      void openFile(const std::string& filename, 
+                    const std::string& path,
+                    size_t nbConstant) override;
   };
 
 } // namespace CodeGen

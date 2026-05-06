@@ -45,6 +45,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
 
+    progGenerationEngine->openFile(progGenerationEngine->filename + "_" + filenameProg, progGenerationEngine->path, p.getEnvironment().getParams().nbProgramConstant);
+
     progGenerationEngine->setProgram(p);
 
     bool isDestinationAnAction = false;
