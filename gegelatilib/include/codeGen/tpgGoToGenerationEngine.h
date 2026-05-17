@@ -1,5 +1,6 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2026) :
+ * Paul Allaire <paul.allaire@insa-rennes.fr> (2026)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -42,8 +43,7 @@ namespace CodeGen {
 
 /**
  * \brief Generation engine producing a TPG inference function that uses
- *        GCC computed-goto dispatch (&&label / goto *ptr) instead of the
- *        traditional while(1)+switch structure or stack-based recursion.
+ *        GCC computed-goto dispatch (&&label / goto *ptr)
  *
  * Generated TPG.c structure:
  *  - static inline bestProgram() helper,
@@ -56,13 +56,11 @@ namespace CodeGen {
  *   inline __attribute__((always_inline)) fixedpt P<id>(const fixedpt * restrict in1, …)
  *
  * Design note — two program engines:
- *   TPGGenerationEngine constructs a ProgramGenerationEngine member
- *   (progGenerationEngine) in its initialiser list; we cannot prevent
- *   this.  We add our own GotoProgramGenerationEngine member (gotoProg)
- *   and use it exclusively.  Both engines target the same _program.h
- *   file name; gotoProg's constructor rewrites the file with the correct
- *   goto-style prologue, so the output is correct.  progGenerationEngine
- *   is constructed but never called.
+ *   TPGGenerationEngine has a ProgramGenerationEngine attribute but when a
+ *   TPGGoToGenerationEngine is used, that attribute is a GotoProgramGenerationEngine.
+ * 
+ *   This allows us to reuse the base class's program generation logic while
+ *   overriding the program generation style in the GotoProgramGenerationEngine.
  */
 class TPGGoToGenerationEngine : public TPGGenerationEngine
 {
@@ -73,10 +71,14 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
      * \param filename  Base name for the generated .c/.h files.
      * \param tpg       The TPG graph to generate code for.
      * \param path      Output directory (trailing '/' required).
+     * \param is_instrumented denotes instrumentation at team level
+     * \param is_decorated denotes decoration at team level for disassembly inspection
      */
     TPGGoToGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
-                            const std::string& path = "./");
+                            const std::string& path = "./",
+                            bool is_instrumented = false,
+                            bool is_decorated = false);
 
     /**
      * \brief Destructor — base class handles closing fileMain/fileMainH.
@@ -138,6 +140,15 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
 
     /// Number of input-array parameters passed to every program.
     static constexpr int NB_INPUTS = 4;
+
+    /// boolean set if we instrument the TPG at inference at team level
+    /// all programs of a given team are surrounded by CSR reads 
+    bool is_instrumented;
+
+    /// boolean set if we decorate the TPG at inference at team level
+    /// all programs of a given team are surrounded by additional assembly 
+    /// start & end labels 
+    bool is_decorated;
 };
 
 } // namespace CodeGen

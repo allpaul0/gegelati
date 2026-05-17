@@ -43,47 +43,17 @@ CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     const std::string& path, bool globalVarUsed, int nbInputs)
     : ProgramGenerationEngine(filename, env, path, false), nbInputs(nbInputs)
 {
-    // After the base constructor:
-    //   - fileH is open and contains the standard header prologue.
-    //   - fileC is NOT open (openFile() has its fileC.open() commented out).
-    //
-    // We must:
-    //   1. Close and rewrite fileH with the goto-style prologue.
-    //   2. Open fileC on /dev/null so iterateThroughtProgram() always has a
-    //      valid stream buffer to redirect away from.
-    //fileH.close();
-    //openGotoFile(filename, path, env.getParams().nbProgramConstant);
 }
-
-// ============================================================
-// Destructor
-// ============================================================
 
 CodeGen::GotoProgramGenerationEngine::~GotoProgramGenerationEngine()
 {
-    // if (fileH.is_open() && !headerClosed) {
-    //     // explicit sync before the #endif, in case any buffered
-    //     // content from a prior rdbuf redirect is still pending. ***
-        // fileH.flush();
-        // fileH << "DESTRUCTOR GOTOPROGGENENGINE" << std::flush;
-        // fileH << "\n#endif\n" << std::flush;
-        // fileH.flush();  // ensure #endif reaches the file before close()
-    //     fileH.close();
-    // }
-    // Tell the base destructor not to emit another #endif / close fileH again.
-    // headerClosed = true;
-    // fileC (/dev/null) will be closed by the base destructor.
 }
-
-// ============================================================
-// openGotoFile
-// ============================================================
 
 void CodeGen::GotoProgramGenerationEngine::openFile(
     const std::string& filename, const std::string& path,
-    size_t /*nbConstant*/)
+    size_t nbConstant)
 {
-    // Re-open fileH with goto-style content (header-only; no .c needed).
+    // Opens fileH with goto-style content 
     fileH.open(path + filename + ".h", std::ofstream::out);
     if (!fileH.is_open()) {
         throw std::runtime_error(
@@ -104,12 +74,7 @@ void CodeGen::GotoProgramGenerationEngine::openFile(
           << "#include \"externHeader.h\"\n"
           << "\n";
 
-    // commit the prologue to the OS-level buffer now.
-    // This prevents the prologue bytes from sitting in fileH's
-    // userspace buffer when generateProgram() later installs the
-    // rdbuf redirect, which would allow subsequent writes through
-    // fileC to be serialised before the prologue in the output file. ***
-    // fileH.flush();
+    // Header only design, header contains the full implem of programs 
 
     // --- Open fileC on the null device so it has a valid buffer ---
     // generateCurrentLine() and initOperandCurrentLine() write to fileC; we
@@ -126,12 +91,9 @@ void CodeGen::GotoProgramGenerationEngine::openFile(
             "GotoProgramGenerationEngine: cannot open null device for fileC");
     }
 
-    // No global variables to initialize in goto-style generation.
+    // No global variables to initialize in goto-style generation. 
+    // vars are passed as params 
 }
-
-// ============================================================
-// generateProgram overrides base method to emit inline function into fileH
-// ============================================================
 
 void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
                                                            bool ignoreException)
@@ -157,7 +119,7 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     }
     fileH << "};\n";
 
-    // -- Constants array (if any) --
+    // -- Constants array (if any) -- This code has not been tested 
     int nbCst = static_cast<int>(
         this->program->getEnvironment().getParams().nbProgramConstant);
     if (nbCst > 0) {
@@ -169,6 +131,8 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
         }
         fileH << "};\n";
     }
+
+    // Header only design, header contains the full implem of programs 
 
     // Redirect fileC's stream buffer to fileH's buffer.
     // generateCurrentLine() / initOperandCurrentLine() write to fileC; with
@@ -194,34 +158,32 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     fileH << "\treturn reg[0];\n}\n";
 }
 
-// ============================================================
-// getNameSourceData overrides base method to map data source indices to parameter names
-// ============================================================
+// map data source indices to parameter names
 
-std::string CodeGen::GotoProgramGenerationEngine::getNameSourceData(
-    const uint64_t& idx)
-{
-    // idx 0          → registers  ("reg")
-    // idx 1          → constants  ("cst"), only if nbProgramConstant > 0
-    // idx 1 (or 2)…  → input arrays: "in1", "in2", …
+// std::string CodeGen::GotoProgramGenerationEngine::getNameSourceData(
+//     const uint64_t& idx)
+// {
+//     // idx 0          → registers  ("reg")
+//     // idx 1          → constants  ("cst"), only if nbProgramConstant > 0
+//     // idx 1 (or 2)…  → input arrays: "in1", "in2", …
 
-    if (idx == 0) {
-        return nameRegVariable; // "reg"
-    }
+//     if (idx == 0) {
+//         return nameRegVariable; // "reg"
+//     }
 
-    if (this->program->getEnvironment().getParams().nbProgramConstant > 0 &&
-        idx == 1) {
-        return nameConstantVariable; // "cst"
-    }
+//     if (this->program->getEnvironment().getParams().nbProgramConstant > 0 &&
+//         idx == 1) {
+//         return nameConstantVariable; // "cst"
+//     }
 
-    // Compute the 1-based "inN" index.
-    // Without constants: idx 1 → in1, idx 2 → in2, …
-    // With constants:    idx 2 → in1, idx 3 → in2, …
-    uint64_t inputIdx = idx;
-    if (this->program->getEnvironment().getParams().nbProgramConstant > 0) {
-        inputIdx--; // shift past the constants slot
-    }
-    return nameDataVariable + std::to_string(inputIdx); // "in1", "in2", …
-}
+//     // Compute the 1-based "inN" index.
+//     // Without constants: idx 1 → in1, idx 2 → in2, …
+//     // With constants:    idx 2 → in1, idx 3 → in2, …
+//     uint64_t inputIdx = idx;
+//     if (this->program->getEnvironment().getParams().nbProgramConstant > 0) {
+//         inputIdx--; // shift past the constants slot
+//     }
+//     return nameDataVariable + std::to_string(inputIdx); // "in1", "in2", …
+// }
 
 #endif // CODE_GENERATION

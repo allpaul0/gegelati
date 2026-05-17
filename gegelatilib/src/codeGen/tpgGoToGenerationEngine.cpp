@@ -35,23 +35,16 @@
 
 #include "codeGen/tpgGoToGenerationEngine.h"
 
-// ============================================================
-// Constructor
-// ============================================================
-
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
-    const std::string& path)
+    const std::string& path, bool is_instrumented, bool is_decorated)
     : TPGGenerationEngine(filename, tpg, path, 
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
 {
-    // No additional initialization needed here since the base class constructor
+    this->is_instrumented = is_instrumented;
+    this->is_decorated = is_decorated;
 }
-
-// ============================================================
-// generateTPGGraph
-// ============================================================
 
 void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
 {
@@ -93,9 +86,6 @@ void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
     fileMain << "}" << std::endl;
 }
 
-// ============================================================
-// initTpgFile
-// ============================================================
 
 void CodeGen::TPGGoToGenerationEngine::initTpgFile()
 {
@@ -149,7 +139,13 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << " */\n"
         << "    goto *jump_table[" << jumpTableIndex(root) << "];"
         << "   /* == &&L_" << vertexName(root) << " */\n"
-        << "\n"
+        << "\n";
+
+    if (is_instrumented) {
+        fileMain << "    uint32_t start, end;\n";
+    }
+
+    fileMain
         << "    /* ---- Team nodes ----------------------------------------- */\n"
         << "\n";
 }
@@ -242,6 +238,19 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     // scores array.
     fileMain << "        fixedpt  scores[" << nbEdges << "];\n\n";
 
+    // decoration for disassembly code analysis - start
+    if (is_decorated) {
+        fileMain << "\t";
+        fileMain << "__asm__ volatile(\"";
+        fileMain << label;
+        fileMain << "_start:\");\n";
+    }
+
+    // CSR counter READ - start
+    if (is_instrumented) {
+        fileMain << "\tCSR_READ(CSR_REG_MCYCLE, &start);";
+    }
+
     // One score assignment per edge.
     int i = 0;
     for (auto* edge : edges) {
@@ -249,6 +258,19 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
         generateEdge(*edge);
         fileMain << ";\n";
         ++i;
+    }
+
+    // decoration for disassembly code analysis - end
+    if (is_decorated) {
+        fileMain << "\t";
+        fileMain << "__asm__ volatile(\"";
+        fileMain << label;
+        fileMain << "_end:\");\n";
+    }
+
+    // CSR counter READ - end
+    if (is_instrumented) {
+        fileMain << "\tCSR_READ(CSR_REG_MCYCLE, &end);";
     }
 
     // Dispatch.

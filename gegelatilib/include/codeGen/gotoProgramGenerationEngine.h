@@ -1,5 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2026) :
+ * 
+ * Paul Allaire <paul.allaire@insa-rennes.fr> (2026)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -41,35 +43,40 @@ namespace CodeGen {
 
 /**
  * \brief Specialisation of ProgramGenerationEngine for the computed-goto
- *        dispatch style.
+ * dispatch style. 
+ *
+ * Runtime polymorphism (dynamic dispatch) is used so that a
+ * ProgramGenerationEngine base-class pointer or reference can refer to a
+ * GotoProgGenEngine object and invoke the appropriate overridden virtual
+ * methods at runtime.
  *
  * Key design decisions driven by the base class implementation:
  *
- *  1. ProgramGenerationEngine::openFile() no longer opens fileC (it is
- *     commented out in the current source), so fileC is always in a
- *     closed/invalid state.  generateCurrentLine() and
- *     initOperandCurrentLine() both write to fileC, so we must open a
- *     real sink for fileC before calling iterateThroughtProgram(); we use
- *     a platform-null device (/dev/null on POSIX) for this purpose.
- *
- *  2. All program bodies must land in fileH (header-only, so GCC can
- *     inline them).  We achieve this by redirecting fileC's stream buffer
- *     to fileH's buffer while iterateThroughtProgram() runs, then
- *     restoring it afterwards.  The redirect uses std::ostream::rdbuf()
- *     on the std::ostream base of fileC (std::ofstream::rdbuf() is
- *     const; the base class two-argument form is what we need).
- *
- *  3. getNameSourceData() is shadowed (not overridden — base is not
- *     virtual) so that data-source indices map to function parameters
- *     "inN" instead of global extern pointers.  Callers must hold a
- *     GotoProgramGenerationEngine* for dispatch to work correctly.
- *
- *  4. generateProgram() is likewise shadowed to emit
+ *  1. We want to generate header-only code (all program bodies in fileH) so that
+ *     GCC can inline it.  The base class is designed to write program bodies to
+ *     fileC, so we must redirect that output to fileH.
+ * 
+ *     gotoProgramGenerationEngine::openFile() overrides the base class method.
+ *     It opens fileH normally and fileC
+ *     on a platform-null device (e.g. /dev/null) so it has a valid stream.
+ *     
+ *    2. generateProgram() is overriden to emit
  *     "inline __attribute__((always_inline)) fixedpt P<id>(...)" into
  *     fileH instead of the base "double P<id>()" into fileC.
+ *     
+ *     We redirect the fileC stream to fileH and call base class methods
+ *     for program generation on fileC before restoring the fileC stream.
+ *  
+ *     iterateThroughtProgram() -> processLine() 
+ *     -> generateCurrentLine() -> initOperandCurrentLine() 
+ *     are all base class methods that write to fileC. 
+ * 
+ *      This design allows us to reuse the base class's program generation logic.
  *
- *  5. The destructor sets headerClosed = true before the base destructor
- *     runs, preventing a double "#endif" in the output file.
+ *  3. getNameSourceData() is overriden so that data-source indices map
+ *     to function parameters "inN" instead of global extern pointers. Callers must hold a
+ *     GotoProgramGenerationEngine* for dispatch to work correctly.
+ *
  */
 
   class GotoProgramGenerationEngine : public ProgramGenerationEngine
@@ -77,7 +84,7 @@ namespace CodeGen {
     public:
       /**
        * \param filename   Base name; the engine writes to <filename>.h.
-       * \param env        The GEGELATI Environment (registers, constants, …).
+       * \param env        The GEGELATI Environment (registers, constants, ISet, DataHandlers, …).
        * \param path       Output directory (trailing '/' required).
        * \param globalVarUsed Whether to use global variables to access data sources
        * \param nbInputs   Number of "const fixedpt * restrict inN" parameters
@@ -91,17 +98,14 @@ namespace CodeGen {
 
       /**
        * \brief Destructor.
-       *
-       * Writes the closing #endif guard into fileH, marks headerClosed so
-       * the base destructor does not emit a second guard, then closes fileH.
-       * fileC (opened on /dev/null) is closed by the base destructor.
+       * does nothing.
        */
       ~GotoProgramGenerationEngine() override;
 
       /**
        * \brief Generates one inline program function into fileH.
        *
-       * Shadows ProgramGenerationEngine::generateProgram() — callers must
+       * overrides ProgramGenerationEngine::generateProgram() — callers must
        * use a GotoProgramGenerationEngine* or reference.
        *
        * While the program lines are being generated (iterateThroughtProgram)
@@ -116,28 +120,27 @@ namespace CodeGen {
 
     protected:
       /**
-       * \brief Maps data-source indices to function parameter names.
+       * brief Maps data-source indices to function parameter names.
        *
        * Shadows ProgramGenerationEngine::getNameSourceData().
        *  idx == 0                        → "reg"
        *  idx == 1, nbProgramConstant > 0 → "cst"
        *  otherwise                       → "in1", "in2", …
        */
-      std::string getNameSourceData(const uint64_t& idx) override;
+    //  std::string getNameSourceData(const uint64_t& idx) override;
 
     private:
       /// Number of "const fixedpt * restrict inN" parameters.
       int nbInputs;
 
       /**
-       * \brief Re-initialises fileH with the goto-style header prologue and
+       * \brief Overrides ProgramGenerationEngine::openFile() to implement 
+       *        the goto-sstyle.
+       *        Initialises fileH with the goto-style header prologue and
        *        opens fileC on /dev/null so iterateThroughtProgram() has a
        *        valid (but discarded) sink before the redirect is installed.
        *
-       * Called from the constructor after the base class has run so we can
-       * replace the header content with the goto-style version.
-       *
-       * \param filename  Base filename (without extension).
+       * \param filename  filename 
        * \param path      Output directory.
        * \param nbConstant Number of program constants (used for include guard).
        */
