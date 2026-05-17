@@ -72,6 +72,7 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(
             << ".\n"
             << " */\n\n";
 
+    if (is_instrumented) fileMain << "#include \"csr.h\"\n";
     fileMain << "#include \"" << filename << ".h\"\n" << std::endl;
 
     fileMainH << "/**\n"

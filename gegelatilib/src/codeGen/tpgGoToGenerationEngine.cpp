@@ -140,7 +140,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << "\n";
 
     if (is_instrumented) {
-        fileMain << "    uint32_t start, end;\n";
+        fileMain << "    uint32_t start, end;\n\n";
     }
 
     fileMain
@@ -238,7 +238,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // decoration for disassembly code analysis - start
     if (is_decorated) {
-        fileMain << "\t";
+        fileMain << "\t\t";
         fileMain << "__asm__ volatile(\"";
         fileMain << label;
         fileMain << "_start:\");\n";
@@ -246,7 +246,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // CSR counter READ - start
     if (is_instrumented) {
-        fileMain << "\tCSR_READ(CSR_REG_MCYCLE, &start);";
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &start);\n\n";
     }
 
     // One score assignment per edge.
@@ -260,7 +260,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // decoration for disassembly code analysis - end
     if (is_decorated) {
-        fileMain << "\t";
+        fileMain << "\t\t";
         fileMain << "__asm__ volatile(\"";
         fileMain << label;
         fileMain << "_end:\");\n";
@@ -268,7 +268,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // CSR counter READ - end
     if (is_instrumented) {
-        fileMain << "\tCSR_READ(CSR_REG_MCYCLE, &end);";
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
     }
 
     // Dispatch.
