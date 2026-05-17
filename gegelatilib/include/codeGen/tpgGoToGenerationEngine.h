@@ -71,13 +71,13 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
      * \param filename  Base name for the generated .c/.h files.
      * \param tpg       The TPG graph to generate code for.
      * \param path      Output directory (trailing '/' required).
-     * \param is_instrumented denotes instrumentation at team level
+     * \param is_instrumented denotes instrumentation at team level 
      * \param is_decorated denotes decoration at team level for disassembly inspection
      */
     TPGGoToGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
-                            bool is_instrumented = false,
+                            bool is_instrumented = false, 
                             bool is_decorated = false);
 
     /**
@@ -140,15 +140,6 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
 
     /// Number of input-array parameters passed to every program.
     static constexpr int NB_INPUTS = 4;
-
-    /// boolean set if we instrument the TPG at inference at team level
-    /// all programs of a given team are surrounded by CSR reads 
-    bool is_instrumented;
-
-    /// boolean set if we decorate the TPG at inference at team level
-    /// all programs of a given team are surrounded by additional assembly 
-    /// start & end labels 
-    bool is_decorated;
 };
 
 } // namespace CodeGen

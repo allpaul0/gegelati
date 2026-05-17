@@ -54,7 +54,9 @@ CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
 std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
     TPGGenerationEngineFactory::create(const std::string& filename,
                                        const TPG::TPGGraph& tpg,
-                                       const std::string& path)
+                                       const std::string& path,
+                                       bool is_instrumented,
+                                       bool is_decorated)
 {
     if (this->mode == stackMode) {
         return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path);
@@ -63,7 +65,8 @@ std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
         return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);
     }
     else if (this->mode == gotoMode) {
-        return std::make_unique<TPGGoToGenerationEngine>(filename, tpg, path);
+        return std::make_unique<TPGGoToGenerationEngine>(filename, tpg, path, 
+                                                        is_instrumented, is_decorated);
     }
     else {
         return nullptr;

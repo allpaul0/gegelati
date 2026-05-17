@@ -79,7 +79,8 @@ namespace CodeGen {
          */
         std::unique_ptr<TPGGenerationEngine> create(
             const std::string& filename, const TPG::TPGGraph& tpg,
-            const std::string& path = "./");
+            const std::string& path = "./", bool is_instrumented = false,
+            bool is_decorated = false);
 
       private:
         enum generationEngineMode mode;

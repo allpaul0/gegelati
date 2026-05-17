@@ -45,7 +45,7 @@
 CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path)
-    : TPGGenerationEngine(filename, tpg, path, 
+    : TPGGenerationEngine(filename, tpg, path, false, false,
         std::make_unique<CodeGen::ProgramGenerationEngine>(
             filename + "_" + filenameProg, tpg.getEnvironment(), path, true))
 {

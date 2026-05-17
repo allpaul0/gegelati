@@ -106,6 +106,15 @@ namespace CodeGen {
          */
         virtual void initHeaderFile() = 0;
 
+        /// boolean set if we instrument the TPG at inference at team level
+        /// all programs of a given team are surrounded by CSR reads 
+        bool is_instrumented;
+
+        /// boolean set if we decorate the TPG at inference at team level
+        /// all programs of a given team are surrounded by additional assembly 
+        /// start & end labels 
+        bool is_decorated;
+
       public:
         /**
          * \brief Main constructor of the class.
@@ -118,10 +127,17 @@ namespace CodeGen {
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
+         * \param is_instrumented denotes instrumentation at team level
+         * 
+         * \param is_decorated denotes decoration at team level for disassembly inspection
+         *
+         * \param progGenEngine the engine used to create programs 
          */
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
+                            bool is_instrumented = false,
+                            bool is_decorated = false,
                             std::unique_ptr<CodeGen::ProgramGenerationEngine> 
                               progGenEngine = nullptr);
 

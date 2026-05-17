@@ -38,12 +38,10 @@
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path, bool is_instrumented, bool is_decorated)
-    : TPGGenerationEngine(filename, tpg, path, 
+    : TPGGenerationEngine(filename, tpg, path, is_instrumented, is_decorated, 
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
 {
-    this->is_instrumented = is_instrumented;
-    this->is_decorated = is_decorated;
 }
 
 void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
