@@ -260,7 +260,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // decoration for disassembly code analysis - end
     if (is_decorated) {
-        fileMain << "\t\t";
+        fileMain << "\n\t\t";
         fileMain << "__asm__ volatile(\"";
         fileMain << label;
         fileMain << "_end:\");\n";
