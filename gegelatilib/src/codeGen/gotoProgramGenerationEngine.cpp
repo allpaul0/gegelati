@@ -102,7 +102,7 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     std::ostringstream params;
     for (int i = 1; i <= nbInputs; ++i) {
         if (i > 1) params << ", ";
-        params << "const fixedpt * restrict in" << i;
+        params << "const fixedpt * __restrict__ in" << i;
     }
 
     // Emit the inline function signature directly into fileH.

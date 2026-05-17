@@ -111,7 +111,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << "\n"
         << "void inferenceTPG(fixedpt *actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
-        fileMain << ",\n                  const fixedpt * restrict in" << i;
+        fileMain << ",\n                  const fixedpt * __restrict__ in" << i;
     }
     fileMain << ")\n{\n";
 
@@ -177,10 +177,10 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "# define NB_TEAMS " << nbTeams << "\n"
         << "\n";
 
-    // inferenceTPG declaration with restrict-qualified parameters.
+    // inferenceTPG declaration with __restrict__-qualified parameters.
     fileMainH << "void inferenceTPG(fixedpt* actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
-        fileMainH << ", \n\t\t\t\t\tconst fixedpt * restrict in" << i;
+        fileMainH << ", \n\t\t\t\t\tconst fixedpt * __restrict__ in" << i;
     }
     fileMainH << ");\n" << std::endl;
 }
