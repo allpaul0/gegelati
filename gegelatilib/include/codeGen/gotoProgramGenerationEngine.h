@@ -93,6 +93,7 @@ namespace CodeGen {
       GotoProgramGenerationEngine(const std::string& filename,
                                   const Environment& env,
                                   const std::string& path = "./",
+                                  CodeGen::Dtype Dtype = CodeGen::Dtype::Double,
                                   bool globalVarUsed = false,
                                   int nbInputs = 4);
 

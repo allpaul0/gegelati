@@ -95,7 +95,8 @@ namespace CodeGen {
          */
         TPGSwitchGenerationEngine(const std::string& filename,
                                   const TPG::TPGGraph& tpg,
-                                  const std::string& path = "./");
+                                  const std::string& path = "./",
+                                  CodeGen::Dtype dtype = CodeGen::Dtype::Double);
 
         /**
          * \brief destructor of the class.

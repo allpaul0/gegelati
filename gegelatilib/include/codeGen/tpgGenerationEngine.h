@@ -43,6 +43,7 @@
 #include <iostream>
 #include <string>
 
+#include "codeGen/Dtype.h"
 #include "codeGen/programGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
@@ -115,6 +116,9 @@ namespace CodeGen {
         /// start & end labels 
         bool is_decorated;
 
+        /// Dtype of the generated code
+        enum CodeGen::Dtype dtype;
+
       public:
         /**
          * \brief Main constructor of the class.
@@ -129,13 +133,15 @@ namespace CodeGen {
          * folder does not exist.
          * \param is_instrumented denotes instrumentation at team level
          * 
-         * \param is_decorated denotes decoration at team level for disassembly inspection
+         * \param is_decorated denotes decoration at team level for disassembly 
+         * inspection
          *
          * \param progGenEngine the engine used to create programs 
          */
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
+                            CodeGen::Dtype Dtype = CodeGen::Dtype::Double,
                             bool is_instrumented = false,
                             bool is_decorated = false,
                             std::unique_ptr<CodeGen::ProgramGenerationEngine> 

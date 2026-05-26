@@ -77,6 +77,7 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
     TPGGoToGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
+                            CodeGen::Dtype dtype = CodeGen::Dtype::Double,
                             bool is_instrumented = false, 
                             bool is_decorated = false);
 

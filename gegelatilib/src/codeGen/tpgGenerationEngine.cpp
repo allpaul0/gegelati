@@ -44,7 +44,8 @@
 
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg,
-    const std::string& path, bool is_instrumented, bool is_decorated,
+    const std::string& path, CodeGen::Dtype dtype,
+    bool is_instrumented, bool is_decorated,
     std::unique_ptr<ProgramGenerationEngine> progGenEngine)
     : TPGAbstractEngine(tpg), progGenerationEngine{std::move(progGenEngine)}
 {

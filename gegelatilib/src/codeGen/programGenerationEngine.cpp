@@ -48,20 +48,25 @@ const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
     const std::string& filename, const Environment& env, 
-    const std::string& path, bool globalVarUsed)
+    const std::string& path, CodeGen::Dtype dtype, bool globalVarUsed)
     : ProgramEngine(env), dataPrinter()
 {
     this->filename = filename;
     this->path = path;
+    this->dtype = dtype;
     this->globalVarsUsed = globalVarUsed;
 }
 
 CodeGen::ProgramGenerationEngine::ProgramGenerationEngine(
     const std::string& filename, const Program::Program& p, 
-    const std::string& path, bool globalVarUsed) 
+    const std::string& path, CodeGen::Dtype dtype, bool globalVarUsed) 
     : ProgramEngine(p), dataPrinter()
 {
     setProgram(p);
+    this->filename = filename;
+    this->path = path;
+    this->dtype = dtype;
+    this->globalVarsUsed = globalVarUsed;
 }
 
 void CodeGen::ProgramGenerationEngine::generateCurrentLine()
@@ -267,11 +272,16 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
 
-        fileC << "\t\t" << instruction.getPrintablePrimitiveOperandType(i)
-              << " " << nameOperandVariable << i
-              << dataPrinter.printDataAt(dataSource, operandType, opIdx,
+        fileC << "\t\t" 
+            //<< instruction.getPrintablePrimitiveOperandType(i)
+            // this is a minimal codegen data type fix to generate code
+            // for any type. Full library operand type support should be
+            // implemented to get operand type from the instruction directly.  
+            << this->dtype
+            << " " << nameOperandVariable << i
+            << dataPrinter.printDataAt(dataSource, operandType, opIdx,
                                          getNameSourceData(sourceIdx))
-              << std::endl;
+            << std::endl;
     }
 }
 
@@ -304,15 +314,10 @@ void CodeGen::ProgramGenerationEngine::processLine()
 
 CodeGen::ProgramGenerationEngine::~ProgramGenerationEngine()
 {
-    // Write the trailing guard only if a derived class didn't already do it
-    // if (fileH.is_open() && !headerClosed) {
-        fileH.flush();
-        fileH << "\n#endif" << std::endl;
-    // }
+    fileH.flush();
+    fileH << "\n#endif" << std::endl;
     if (fileC.is_open()) fileC.close();
     if (fileH.is_open()) fileH.close();
-
-    // headerClosed = true;
 }
 
 #endif // CODE_GENERATION

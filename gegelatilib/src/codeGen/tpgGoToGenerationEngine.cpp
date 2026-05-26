@@ -37,10 +37,11 @@
 
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
-    const std::string& path, bool is_instrumented, bool is_decorated)
-    : TPGGenerationEngine(filename, tpg, path, is_instrumented, is_decorated, 
+    const std::string& path, CodeGen::Dtype dtype, 
+    bool is_instrumented, bool is_decorated)
+    : TPGGenerationEngine(filename, tpg, path, dtype, is_instrumented, is_decorated,
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
-        filename + "_" + filenameProg, tpg.getEnvironment(), path, NB_INPUTS))
+        filename + "_" + filenameProg, tpg.getEnvironment(), path, dtype, NB_INPUTS))
 {
 }
 
@@ -88,39 +89,75 @@ void CodeGen::TPGGoToGenerationEngine::generateTPGGraph()
 void CodeGen::TPGGoToGenerationEngine::initTpgFile()
 {
     // ---- bestProgram() helper ----
-    fileMain
+
+    if (this->dtype == CodeGen::Dtype::Fixedpt || this->dtype == CodeGen::Dtype::Int){
+        fileMain
         << "/* ------------------------------------------------------------ */\n"
         << "/* Helper                                                        */\n"
         << "/* ------------------------------------------------------------ */\n"
         << "\n"
-        << "static inline int bestProgram(const fixedpt *results, int nb) {\n"
-        << "    int   best  = 0;\n"
-        << "    fixedpt top = results[0];\n"
-        << "    for (int i = 1; i < nb; i++) {\n"
-        << "        if (results[i] >= top) { top = results[i]; best = i; }\n"
-        << "    }\n"
-        << "    return best;\n"
+        << "static inline int bestProgram(const "
+        << this->dtype
+        << " *results, int nb) {\n"
+        << "\tint bestProgram = 0;\n"
+        << "\t" 
+        << this->dtype
+        << " top = results[0];\n"
+        << "\tfor (int i = 1; i < nb; i++) {\n"
+        << "\t\tif (results[i] >= top) { top = results[i]; best = i; }\n"
+        << "\t}\n"
+        << "\treturn bestProgram;\n"
         << "}\n"
         << "\n";
-
+    }
+    else if (this->dtype == CodeGen::Dtype::Double || this->dtype == CodeGen::Dtype::Float){
+        fileMain
+        << "static inline int bestProgram(const " 
+        //<< ((this->dtype == CodeGen::Double) ? "double" : "float")
+        << this->dtype
+        << " *results, int nb) {\n"
+        << "\tint bestProgram = 0;\n"
+        << "\t" 
+        //<< ((this->dtype == CodeGen::Double) ? "double" : "float")
+        << this->dtype
+        << " bestScore = (isnan(results[0]))? -INFINITY : results[0];\n"
+        << "\tfor (int i = 1; i < nb; i++) {\n"
+        << "\t\t" 
+        //<< ((this->dtype == CodeGen::Double) ? "double" : "float")
+        << this->dtype
+        << " challengerScore = (isnan(results[i]))? -INFINITY : results[i];\n"
+        << "\t\tif (challengerScore >= bestScore) {\n"
+        << "\t\t\tbestProgram = i;\n"
+        << "\t\t\tbestScore = challengerScore;\n"
+        << "\t\t}\n"
+        << "\t}\n"
+        << "\treturn bestProgram;\n"
+        << "}\n"
+        << std::endl;
+    }
+    
     // ---- inferenceTPG() signature ----
     fileMain
         << "/* ------------------------------------------------------------ */\n"
         << "/* Inference — computed goto dispatch                            */\n"
         << "/* ------------------------------------------------------------ */\n"
         << "\n"
-        << "void inferenceTPG(fixedpt *actions";
+        << "void inferenceTPG(" 
+        << this->dtype
+        << " *actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
-        fileMain << ",\n                  const fixedpt * __restrict__ in" << i;
+        fileMain << ",\n                  const "
+        << this->dtype
+        << " * __restrict__ in" << i;
     }
     fileMain << ")\n{\n";
 
     // ---- static jump_table[] ----
     fileMain
-        << "    /* Jump table — static const lets GCC keep it in .rodata and\n"
-        << "       potentially cache it in a register across iterations.       */\n"
-        << "    static const void * const jump_table[] = {\n"
-        << "        ";
+        << "\t/* Jump table — static const lets GCC keep it in .rodata and\n"
+        << "\t   potentially cache it in a register across iterations.       */\n"
+        << "\tstatic const void * const jump_table[] = {\n"
+        << "\t\t";
 
     for (std::size_t i = 0; i < orderedVertices.size(); ++i) {
         fileMain << "&&L_" << vertexName(*orderedVertices[i]);
@@ -133,18 +170,18 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
     // ---- initial dispatch to root ----
     const auto& root = *tpg.getRootVertices().at(0);
     fileMain
-        << "    /* Initial dispatch — always start at " << vertexName(root) 
+        << "\t/* Initial dispatch — always start at " << vertexName(root) 
         << " */\n"
-        << "    goto *jump_table[" << jumpTableIndex(root) << "];"
-        << "   /* == &&L_" << vertexName(root) << " */\n"
+        << "\tgoto *jump_table[" << jumpTableIndex(root) << "];"
+        << "\t/* == &&L_" << vertexName(root) << " */\n"
         << "\n";
 
     if (is_instrumented) {
-        fileMain << "    uint32_t start, end;\n\n";
+        fileMain << "\tuint32_t start, end;\n\n";
     }
 
     fileMain
-        << "    /* ---- Team nodes ----------------------------------------- */\n"
+        << "\t/* ---- Team nodes ----------------------------------------- */\n"
         << "\n";
 }
 
@@ -178,9 +215,13 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "\n";
 
     // inferenceTPG declaration with __restrict__-qualified parameters.
-    fileMainH << "void inferenceTPG(fixedpt* actions";
+    fileMainH << "void inferenceTPG("
+    << this->dtype
+    << "* actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
-        fileMainH << ", \n\t\t\t\t\tconst fixedpt * __restrict__ in" << i;
+        fileMainH << ", \n\t\t\t\t\tconst "
+        << this->dtype
+        << " * __restrict__ in" << i;
     }
     fileMainH << ");\n" << std::endl;
 }
@@ -222,7 +263,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "L_" << label << ": {\n";
 
     // static const int next[] — maps edge index → jump_table index.
-    fileMain << "        static const int next[" << nbEdges << "] = { ";
+    fileMain << "\t\tstatic const int next[" << nbEdges << "] = { ";
     {
         bool first = true;
         for (auto* edge : edges) {
@@ -234,7 +275,9 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << " };\n";
 
     // scores array.
-    fileMain << "        fixedpt  scores[" << nbEdges << "];\n\n";
+    fileMain << "\t\t"
+    << this->dtype
+    << "  scores[" << nbEdges << "];\n\n";
 
     // decoration for disassembly code analysis - start
     if (is_decorated) {
@@ -273,9 +316,9 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     // Dispatch.
     fileMain << "\n"
-             << "        goto *jump_table[next[bestProgram(scores, "
+             << "\t\tgoto *jump_table[next[bestProgram(scores, "
              << nbEdges << ")]];\n"
-             << "    }\n\n";
+             << "\t}\n\n";
 }
 
 // ============================================================

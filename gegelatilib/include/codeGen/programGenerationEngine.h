@@ -45,6 +45,7 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "program/programEngine.h"
+#include "codeGen/Dtype.h"
 
 namespace CodeGen {
     /**
@@ -96,9 +97,6 @@ namespace CodeGen {
 
         ///  Utility class used to print data accesses in generated code.
         Data::DataHandlerPrinter dataPrinter;
-    
-        // true when a derived class already closed the header guard and fileH
-        bool headerClosed = false;
 
         // true when global variables are used to access data sources
         bool globalVarsUsed = true;
@@ -140,6 +138,7 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Environment& env,
                                 const std::string& path = "./",
+                                CodeGen::Dtype Dtype = CodeGen::Dtype::Double,
                                 bool globalVarUsed = true);
         
         /**
@@ -167,6 +166,7 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
                                 const std::string& path = "./",
+                                CodeGen::Dtype Dtype = CodeGen::Dtype::Double,
                                 bool globalVarUsed = true);
 
         /**
@@ -272,6 +272,9 @@ namespace CodeGen {
          * the generated program
          */
         virtual std::string getNameSourceData(const uint64_t& idx);
+
+        /// Dtype of the generated code
+        enum CodeGen::Dtype dtype;
     };
 
 } // namespace CodeGen

@@ -1,9 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
- *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
- * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
- * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
+ * Copyright or © or Copr. IETR/INSA - Rennes (2026) :
+ * 
+ * Paul Allaire <paul.allaire@insa-rennes.fr> (2026)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,42 +34,59 @@
  */
 
 #ifdef CODE_GENERATION
+#ifndef DTYPE_H
+#define DTYPE_H
 
-#include "codeGen/tpgGenerationEngineFactory.h"
-#include "codeGen/tpgStackGenerationEngine.h"
-#include "codeGen/tpgSwitchGenerationEngine.h"
-#include "codeGen/tpgGoToGenerationEngine.h"
+/** 
+* \brief
+* Utility class to represent the data type of the generated code. 
+* The TPGGenerationEngineFactory create() method sets the data type of the 
+* generated code (default double) by instanciating a TPGGenerationEngine 
+* that stores the data type as a member variable.
+* 
+* This class provides serilization methods to convert between the data type
+* defined in the enum and their string representations.
+**/
 
-CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory()
-    : TPGGenerationEngineFactory(switchMode){};
+namespace CodeGen {
+  enum class Dtype
+  {
+    Double,
+    Float,
+    Fixedpt,
+    Int
+  };
 
-CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
-    enum generationEngineMode mode)
-{
-    this->mode = mode;
-}
+  constexpr std::string_view to_string(Dtype dtype_val){
+    switch (dtype_val)
+    {
+      case Dtype::Double : return "double"; 
+      case Dtype::Float : return "float"; 
+      case Dtype::Fixedpt : return "fixedpt"; 
+      case Dtype::Int : return "int";
+    } 
+    return "unknown_type";
+  }
 
-std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
-    TPGGenerationEngineFactory::create(const std::string& filename,
-                                       const TPG::TPGGraph& tpg,
-                                       const std::string& path,
-                                       CodeGen::Dtype dtype,
-                                       bool is_instrumented,
-                                       bool is_decorated)
-{
-    if (this->mode == stackMode) {
-        return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path);
+  constexpr CodeGen::Dtype dtpye_from_string(std::string_view dtype_string) {
+    if (dtype_string == "double") {
+        return Dtype::Double;
+    } else if (dtype_string == "float") {
+        return Dtype::Float;
+    } else if (dtype_string == "fixedpt") {
+        return Dtype::Fixedpt;
+    } else if (dtype_string == "int") {
+        return Dtype::Int;
     }
-    else if (this->mode == switchMode) {
-        return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);
-    }
-    else if (this->mode == gotoMode) {
-        return std::make_unique<TPGGoToGenerationEngine>(filename, tpg, path, dtype, 
-                                                        is_instrumented, is_decorated);
-    }
-    else {
-        return nullptr;
-    }
-}
 
+    throw std::invalid_argument("Unknown Dtype");
+  }
+
+  inline std::ostream& operator<<(std::ostream& os, Dtype type) {
+    return os << to_string(type);
+  }
+
+} // namespace CodeGen
+
+#endif // DTYPE_H
 #endif // CODE_GENERATION

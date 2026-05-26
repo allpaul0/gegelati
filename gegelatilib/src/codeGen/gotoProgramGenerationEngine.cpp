@@ -40,8 +40,8 @@
 
 CodeGen::GotoProgramGenerationEngine::GotoProgramGenerationEngine(
     const std::string& filename, const Environment& env,
-    const std::string& path, bool globalVarUsed, int nbInputs)
-    : ProgramGenerationEngine(filename, env, path, false), nbInputs(nbInputs)
+    const std::string& path, CodeGen::Dtype dtype, bool globalVarUsed, int nbInputs)
+    : ProgramGenerationEngine(filename, env, path, dtype, false), nbInputs(nbInputs)
 {
 }
 
@@ -102,12 +102,16 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     std::ostringstream params;
     for (int i = 1; i <= nbInputs; ++i) {
         if (i > 1) params << ", ";
-        params << "const fixedpt * __restrict__ in" << i;
+        params << "const "
+        << this->dtype
+        << " * __restrict__ in" << i;
     }
 
     // Emit the inline function signature directly into fileH.
-    fileH << "\ninline __attribute__((always_inline)) fixedpt P" << progID
-          << "(" << params.str() << ") {\n";
+    fileH << "\ninline __attribute__((always_inline)) "
+    << this->dtype    
+    << " P" << progID
+    << "(" << params.str() << ") {\n";
 
     // -- Register array --
     int nbReg = static_cast<int>(
