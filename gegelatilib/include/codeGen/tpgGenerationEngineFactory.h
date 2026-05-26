@@ -80,7 +80,7 @@ namespace CodeGen {
         std::unique_ptr<TPGGenerationEngine> create(
             const std::string& filename, const TPG::TPGGraph& tpg,
             const std::string& path = "./",
-            CodeGen::Dtype dtype = CodeGen::Dtype::Double, 
+            std::string_view dtype_string = "double", 
             bool is_instrumented = false, bool is_decorated = false);
 
       private:

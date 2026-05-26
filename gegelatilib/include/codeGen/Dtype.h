@@ -68,7 +68,7 @@ namespace CodeGen {
     return "unknown_type";
   }
 
-  constexpr CodeGen::Dtype dtpye_from_string(std::string_view dtype_string) {
+  constexpr CodeGen::Dtype dtype_from_string(std::string_view dtype_string) {
     if (dtype_string == "double") {
         return Dtype::Double;
     } else if (dtype_string == "float") {

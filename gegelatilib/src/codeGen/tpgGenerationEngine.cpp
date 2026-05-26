@@ -51,6 +51,7 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(
 {
     this->is_instrumented = is_instrumented;
     this->is_decorated = is_decorated;
+    this->dtype = dtype;
     
     if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
         !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
