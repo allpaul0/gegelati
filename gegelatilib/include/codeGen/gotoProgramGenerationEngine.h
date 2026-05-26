@@ -61,7 +61,7 @@ namespace CodeGen {
  *     on a platform-null device (e.g. /dev/null) so it has a valid stream.
  *     
  *    2. generateProgram() is overriden to emit
- *     "inline __attribute__((always_inline)) fixedpt P<id>(...)" into
+ *     "inline __attribute__((always_inline)) CodeGen::Dtype P<id>(...)" into
  *     fileH instead of the base "double P<id>()" into fileC.
  *     
  *     We redirect the fileC stream to fileH and call base class methods
@@ -87,7 +87,7 @@ namespace CodeGen {
        * \param env        The GEGELATI Environment (registers, constants, ISet, DataHandlers, …).
        * \param path       Output directory (trailing '/' required).
        * \param globalVarUsed Whether to use global variables to access data sources
-       * \param nbInputs   Number of "const fixedpt * restrict inN" parameters
+       * \param nbInputs   Number of "const CodeGen::Dtype * restrict inN" parameters
        *                   (default 4).
        */
       GotoProgramGenerationEngine(const std::string& filename,
@@ -131,7 +131,7 @@ namespace CodeGen {
     //  std::string getNameSourceData(const uint64_t& idx) override;
 
     private:
-      /// Number of "const fixedpt * restrict inN" parameters.
+      /// Number of "const CodeGen::Dtype * restrict inN" parameters.
       int nbInputs;
 
       /**

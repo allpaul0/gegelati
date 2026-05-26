@@ -47,13 +47,13 @@ namespace CodeGen {
  *
  * Generated TPG.c structure:
  *  - static inline bestProgram() helper,
- *  - inferenceTPG(fixedpt *actions, const fixedpt * restrict in1, …) body,
+ *  - inferenceTPG(CodeGen::Dtype *actions, const CodeGen::Dtype * restrict in1, …) body,
  *  - a static const jump_table[] of &&label addresses,
  *  - per-team  L_T<id>: { … goto *jump_table[next[best]]; } blocks,
  *  - per-action L_A<id>: actions[0] = <id>; return;  lines.
  *
  * Generated _program.h: all programs as
- *   inline __attribute__((always_inline)) fixedpt P<id>(const fixedpt * restrict in1, …)
+ *   inline __attribute__((always_inline)) CodeGen::Dtype P<id>(const CodeGen::Dtype * restrict in1, …)
  *
  * Design note — two program engines:
  *   TPGGenerationEngine has a ProgramGenerationEngine attribute but when a

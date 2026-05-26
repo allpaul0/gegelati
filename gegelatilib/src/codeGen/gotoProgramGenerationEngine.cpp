@@ -116,7 +116,9 @@ void CodeGen::GotoProgramGenerationEngine::generateProgram(uint64_t progID,
     // -- Register array --
     int nbReg = static_cast<int>(
         this->program->getEnvironment().getParams().nbRegisters);
-    fileH << "\tfixedpt reg[" << nbReg << "] = {";
+    fileH << "\"t"
+    << this->dtype
+    << " reg[" << nbReg << "] = {";
     for (int i = 0; i < nbReg; ++i) {
         fileH << "0";
         if (i < nbReg - 1) fileH << ", ";
