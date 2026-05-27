@@ -104,7 +104,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << this->dtype
         << " top = results[0];\n"
         << "\tfor (int i = 1; i < nb; i++) {\n"
-        << "\t\tif (results[i] >= top) { top = results[i]; best = i; }\n"
+        << "\t\tif (results[i] >= top) { top = results[i]; bestProgram = i; }\n"
         << "\t}\n"
         << "\treturn bestProgram;\n"
         << "}\n"
