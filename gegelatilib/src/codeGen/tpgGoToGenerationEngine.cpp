@@ -146,10 +146,11 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << this->dtype
         << " *actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
-        fileMain << ",\n                  const "
+        fileMain << ",\n\t\t\t\t\tconst "
         << this->dtype
         << " * __restrict__ in" << i;
     }
+    if (is_instrumented) fileMain << ",\n\t\t\t\t\tuint32_t * team_cycles";
     fileMain << ")\n{\n";
 
     // ---- static jump_table[] ----
@@ -223,6 +224,7 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << this->dtype
         << " * __restrict__ in" << i;
     }
+    if (is_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
     fileMainH << ");\n" << std::endl;
 }
 
@@ -312,6 +314,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     // CSR counter READ - end
     if (is_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
+        fileMain << "\n\t*team_cycles = end - start;\n";
     }
 
     // Dispatch.
