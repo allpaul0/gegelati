@@ -311,10 +311,19 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
         fileMain << "_end:\");\n";
     }
 
+    // remove the "T" char form the label to obtain the team index for instrumentation
+    std::string id_label;
+    if (!label.empty() && label[0] == 'T') {
+        id_label = label.substr(1);
+    } else {
+        id_label = label; // fallback
+        throw std::runtime_error("label must start with 'T'");
+    }
+
     // CSR counter READ - end
     if (is_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
-        fileMain << "\n\t*team_cycles = end - start;\n";
+        fileMain << "\n\tteam_cycles[" << id_label  << "] = end - start;\n";
     }
 
     // Dispatch.
