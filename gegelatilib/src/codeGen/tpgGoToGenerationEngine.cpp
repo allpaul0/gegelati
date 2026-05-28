@@ -323,7 +323,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     // CSR counter READ - end
     if (is_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
-        fileMain << "\n\tteam_cycles[" << id_label  << "] = end - start;\n";
+        fileMain << "\n\t\tteam_cycles[" << id_label  << "] = end - start;\n";
     }
 
     // Dispatch.
