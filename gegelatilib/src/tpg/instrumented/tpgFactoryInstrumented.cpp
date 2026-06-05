@@ -126,3 +126,134 @@ void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElements(
         }
     }
 }
+
+void TPG::TPGFactoryInstrumented::clearUnusedTPGGraphElementsV2(
+    TPG::TPGGraph& tpg) const
+{
+    // Remove unused vertices first
+    // (this will remove a few edges as a side-effect)
+    // Work on a copy of vertex list as the graph is modified during the for
+    // loop.
+    std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
+    for (const TPG::TPGVertex* vertex : vertices) {
+        const TPG::TPGVertexInstrumented* vertexI =
+            dynamic_cast<const TPG::TPGVertexInstrumented*>(vertex);
+        // If the vertex is instrumented AND was never visited
+        if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
+            // remove it
+            tpg.removeVertex(*vertex);
+        }
+    }
+
+    // Remove un-traversed edges
+    std::vector<const TPG::TPGEdge*> edges;
+    // Copy the edge list before iteration
+    for (auto& edge : tpg.getEdges()) {
+        edges.push_back(edge.get());
+    }
+    // Iterate on the edge list
+    for (auto edge : edges) {
+        const TPG::TPGEdgeInstrumented* edgeI =
+            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge);
+        if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
+            tpg.removeEdge(*edge);
+        }
+    }
+
+    // TPG graph is now cleared of all unvisited vertices and untraversed edges.
+    // Now we delete vertices that have a single outgoing edge and replace them
+    // by the following vertex of the edge. 
+    // The edge leading to the deleted vertex is untouched since it is the one
+    // deciding if we traverse the vertex or not.
+    
+    // Work on a copy of the vertex list because we will modify the graph.
+    {
+        std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
+        for (const TPG::TPGVertex* vertex : vertices) {
+            // Rebuild a snapshot of edges for safe iteration while modifying the graph.
+            std::vector<const TPG::TPGEdge*> edgesSnapshot;
+            for (const auto& ePtr : tpg.getEdges()) {
+                edgesSnapshot.push_back(ePtr.get());
+            }
+
+            // Collect outgoing edges from 'vertex'
+            std::vector<const TPG::TPGEdge*> outgoing;
+            for (const TPG::TPGEdge* e : edgesSnapshot) {
+                if (e->getSource() == vertex) {
+                    outgoing.push_back(e);
+                }
+            }
+
+            // Only target vertices with exactly one outgoing edge
+            if (outgoing.size() != 1) {
+                continue;
+            }
+
+            const TPG::TPGEdge* outEdge = outgoing.front();
+            const TPG::TPGVertex* succ = outEdge->getDestination();
+            if (succ == nullptr) {
+                // print error case, should not happen in a well-formed TPG graph
+                std::cerr << "Error: vertex " << vertex
+                          << " has an outgoing edge with null destination."
+                          << std::endl;
+                continue;
+            }
+
+            // Gather incoming edges that point to 'vertex'
+            std::vector<const TPG::TPGEdge*> incoming;
+            for (const TPG::TPGEdge* e : edgesSnapshot) {
+                if (e->getDestination() == vertex) {
+                    incoming.push_back(e);
+                }
+            }
+
+            // For each incoming edge, create a new edge from the same source to the successor,
+            // then remove the old incoming edge. We skip self-loops from vertex -> vertex.
+            for (const TPG::TPGEdge* inE : incoming) {
+                const TPG::TPGVertex* src = inE->getSource();
+                if (src == nullptr || src == vertex) {
+                    // print error self-loop or malformed edge
+                    std::cerr << "Error: vertex " << vertex
+                              << " has an incoming edge with null source or self-loop."
+                              << std::endl;
+                    continue;
+                }
+
+                // // Duplicate the program pointer used by the incoming edge
+                // std::shared_ptr<Program::Program> prog = inE->getProgramSharedPointer();
+
+                // // Add redirected edge src -> succ
+                // tpg.addNewEdge(*src, *succ, prog);
+
+                // // Remove the old incoming edge
+                // tpg.removeEdge(*inE);
+                    
+                // rewire the incoming edge to point to the successor instead of the deleted vertex
+                tpg.setEdgeDestination(*inE, *succ);
+            }
+
+            // remove the outgoing edge
+            tpg.removeEdge(*outEdge);
+
+            // remove vertex
+            tpg.removeVertex(*vertex);
+
+        // // After rewiring incoming edges, remove all edges attached to 'vertex' (including its unique outgoing edge)
+        // // Build a fresh snapshot to find edges to remove safely.
+        // std::vector<const TPG::TPGEdge*> toRemove;
+        // for (const auto& ePtr : tpg.getEdges()) {
+        //     const TPG::TPGEdge* e = ePtr.get();
+        //     if (e->getSource() == vertex || e->getDestination() == vertex) {
+        //         toRemove.push_back(e);
+        //     }
+        // }
+        // for (const TPG::TPGEdge* e : toRemove) {
+        //     tpg.removeEdge(*e);
+        // }
+
+        // // Finally remove the vertex itself
+        // tpg.removeVertex(*vertex);
+
+        }
+    }
+}

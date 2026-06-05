@@ -98,6 +98,8 @@ namespace TPG {
          * TPGVertexInstrumented and TPGEdge will be removed.
          */
         void clearUnusedTPGGraphElements(TPG::TPGGraph& tpg) const;
+
+        void clearUnusedTPGGraphElementsV2(TPG::TPGGraph& tpg) const;
     };
 } // namespace TPG
 
