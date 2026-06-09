@@ -146,7 +146,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
 
         // Reset the learning Environment
-        le.reset(hash, mode, iterationNumber, generationNumber);
+        le.reset(hash, mode);
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&

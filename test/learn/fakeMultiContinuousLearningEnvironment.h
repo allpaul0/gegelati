@@ -77,9 +77,8 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
     }
 
     void reset(size_t seed = 0,
-               Learn::LearningMode mode = Learn::LearningMode::TRAINING,
-               uint16_t iterationNumber = 0,
-               uint64_t generationNumber = 0) override
+               Learn::LearningMode mode = Learn::LearningMode::TRAINING
+            ) override
     {
         nbTurns = 0;
         nbPositivesActions = 0;
