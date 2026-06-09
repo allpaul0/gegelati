@@ -223,30 +223,43 @@ namespace Learn {
         virtual void doActions(std::vector<double> vectActionID);
 
         /**
-         * \brief Reset the LearningEnvironment.
+         * Reset the LearningEnvironment.
          *
-         * Resetting a learning environment is needed to train an agent.
-         * Optionally seed can be given to this function to control the
-         * randomness of a LearningEnvironment (if any). When available, this
-         * feature will be used:
+         * Resetting a learning environment is needed to train, evaluate
+         * and test an agent.
+         * 
+         * The reset method is used to set the learning environment in
+         * a new state, with new data for the learning agent to interact with.
+         * 
+         * A learning environment is either based on : 
+         * - a predefined data set
+         * (e.g. a set of images, signals for a classification problem, 
+         * a set of initial positions, target positions for a control problem, 
+         * etc.). In this case, the reset method does not have logic to create
+         * new data. 
+         * - no data at all, and the learning environment has initialization
+         * logic that randomly initializes the environment states based on the
+         * given seed.  
+         * 
+         * Reset conditions can be used for different purposes, such as :
          * - for comparing the performance of several agents with the same
          * random starting conditions.
          * - for training each agent with diverse starting conditions.
-         *
-         * \param[in] seed the integer value for controlling the randomness of
-         * the LearningEnvironment.
+
+         * \param[in] seed the integer value to indicate the seed for random
+         * initialization of the environment. 
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
          * \param[in] iterationNumber the integer value to indicate the current
-         * iteration number when parameter nbIterationsPerPolicyEvaluation > 1
+         * iteration number
          * \param[in] generationNumber the integer value to indicate the
          * current generation number
          */
-        virtual void reset(size_t seed = 0,
-                           LearningMode mode = LearningMode::TRAINING,
-                           uint16_t iterationNumber = 0,
-                           uint64_t generationNumber = 0) = 0;
-
+        virtual void reset(size_t seed = 0, 
+                        LearningMode mode = LearningMode::TRAINING,
+                        uint16_t iterationNumber = 0,
+                        uint64_t generationNumber = 0
+                    ) = 0;
         /**
          * \brief Get the data sources for this LearningEnvironment.
          *
