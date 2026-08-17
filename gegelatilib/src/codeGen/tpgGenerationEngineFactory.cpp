@@ -56,8 +56,8 @@ std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
                                        const TPG::TPGGraph& tpg,
                                        const std::string& path,
                                        std::string_view dtype_string,
-                                       bool is_instrumented,
-                                       bool is_decorated)
+                                       bool team_instrumented,
+                                       bool team_decorated)
 {
     if (this->mode == stackMode) {
         return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path);
@@ -67,7 +67,7 @@ std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
     }
     else if (this->mode == gotoMode) {
         return std::make_unique<TPGGoToGenerationEngine>(filename, tpg, path, 
-            CodeGen::dtype_from_string(dtype_string), is_instrumented, is_decorated);
+            CodeGen::dtype_from_string(dtype_string), team_instrumented, team_decorated);
     }
     else {
         return nullptr;

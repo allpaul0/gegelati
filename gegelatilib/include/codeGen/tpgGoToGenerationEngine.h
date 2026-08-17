@@ -71,15 +71,15 @@ class TPGGoToGenerationEngine : public TPGGenerationEngine
      * \param filename  Base name for the generated .c/.h files.
      * \param tpg       The TPG graph to generate code for.
      * \param path      Output directory (trailing '/' required).
-     * \param is_instrumented denotes instrumentation at team level 
-     * \param is_decorated denotes decoration at team level for disassembly inspection
+     * \param team_instrumented denotes instrumentation at team level 
+     * \param team_decorated denotes decoration at team level for disassembly inspection
      */
     TPGGoToGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
                             CodeGen::Dtype dtype = CodeGen::Dtype::Double,
-                            bool is_instrumented = false, 
-                            bool is_decorated = false);
+                            bool team_instrumented = false, 
+                            bool team_decorated = false);
 
     /**
      * \brief Destructor — base class handles closing fileMain/fileMainH.

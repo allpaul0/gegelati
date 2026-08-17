@@ -45,12 +45,12 @@
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg,
     const std::string& path, CodeGen::Dtype dtype,
-    bool is_instrumented, bool is_decorated,
+    bool team_instrumented, bool team_decorated,
     std::unique_ptr<ProgramGenerationEngine> progGenEngine)
     : TPGAbstractEngine(tpg), progGenerationEngine{std::move(progGenEngine)}
 {
-    this->is_instrumented = is_instrumented;
-    this->is_decorated = is_decorated;
+    this->team_instrumented = team_instrumented;
+    this->team_decorated = team_decorated;
     this->dtype = dtype;
     
     if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
@@ -74,7 +74,7 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(
             << ".\n"
             << " */\n\n";
 
-    if (is_instrumented) fileMain << "#include \"csr.h\"\n";
+    if (team_instrumented) fileMain << "#include \"csr.h\"\n";
     fileMain << "#include \"" << filename << ".h\"\n" << std::endl;
 
     fileMainH << "/**\n"

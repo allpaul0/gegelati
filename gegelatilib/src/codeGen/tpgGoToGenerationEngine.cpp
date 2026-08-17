@@ -38,8 +38,8 @@
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path, CodeGen::Dtype dtype, 
-    bool is_instrumented, bool is_decorated)
-    : TPGGenerationEngine(filename, tpg, path, dtype, is_instrumented, is_decorated,
+    bool team_instrumented, bool team_decorated)
+    : TPGGenerationEngine(filename, tpg, path, dtype, team_instrumented, team_decorated,
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, dtype, NB_INPUTS))
 {
@@ -148,7 +148,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << this->dtype
         << " * __restrict__ in" << i;
     }
-    if (is_instrumented) fileMain << ",\n\t\t\t\t\tuint32_t * team_cycles";
+    if (team_instrumented) fileMain << ",\n\t\t\t\t\tuint32_t * team_cycles";
     fileMain << ")\n{\n";
 
     // ---- static jump_table[] ----
@@ -175,7 +175,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << "\t/* == &&L_" << vertexName(root) << " */\n"
         << "\n";
 
-    if (is_instrumented) {
+    if (team_instrumented) {
         fileMain << "\tuint32_t start, end;\n\n";
     }
 
@@ -220,7 +220,7 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << this->dtype
         << " * __restrict__ in" << i;
     }
-    if (is_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
+    if (team_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
     fileMainH << ");\n" << std::endl;
 }
 
@@ -278,7 +278,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     << "  scores[" << nbEdges << "];\n\n";
 
     // decoration for disassembly code analysis - start
-    if (is_decorated) {
+    if (team_decorated) {
         fileMain << "\t\t";
         fileMain << "__asm__ volatile(\"";
         fileMain << label;
@@ -286,7 +286,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     }
 
     // CSR counter READ - start
-    if (is_instrumented) {
+    if (team_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &start);\n\n";
     }
 
@@ -300,7 +300,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     }
 
     // decoration for disassembly code analysis - end
-    if (is_decorated) {
+    if (team_decorated) {
         fileMain << "\n\t\t";
         fileMain << "__asm__ volatile(\"";
         fileMain << label;
@@ -317,7 +317,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     }
 
     // CSR counter READ - end
-    if (is_instrumented) {
+    if (team_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
         fileMain << "\n\t\tteam_cycles[" << id_label  << "] = end - start;\n";
     }
