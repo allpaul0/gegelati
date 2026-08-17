@@ -92,6 +92,12 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
 {
     // ---- bestProgram() helper ----
 
+    if (dispatch_instrumented) {
+        fileMain << "static uint32_t dispatch_start;\n";
+        fileMain << "static uint32_t dispatch_end;\n";
+        fileMain << "static uint32_t last_dispatch_size;\n\n";
+    }
+
     if (this->dtype == CodeGen::Dtype::Fixedpt || this->dtype == CodeGen::Dtype::Int){
         fileMain
         << "/* ------------------------------------------------------------ */\n"
@@ -231,9 +237,10 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << " * __restrict__ in" << i;
     }
     if (team_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
+    if (team_instrumented && dispatch_instrumented) fileMainH << ", ";
     if (dispatch_instrumented) {
-        fileMain << ",\n\t\t\t\t\tint32_t * dispatch_counts,\n";
-        fileMain << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
+        fileMainH << "\n\t\t\t\t\tuint32_t * dispatch_counts,\n";
+        fileMainH << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
     }
     fileMainH << ");\n" << std::endl;
 }
@@ -275,10 +282,10 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "L_" << label << ": {\n";
 
     if (dispatch_instrumented) {
-        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n\n";
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &dispatch_end);\n\n";
 
         fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n";
-        fileMain << "\t\t\t[dispatch_counts[last_dispatch_size]++] = dispatch_end - dispatch_start;\n";
+        fileMain << "\t\t\t[dispatch_counts[last_dispatch_size]++] = dispatch_end - dispatch_start;\n\n";
     }
 
     // static const int next[] — maps edge index → jump_table index.
@@ -345,7 +352,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     if (dispatch_instrumented) {
         fileMain << "\n\t\tlast_dispatch_size = " << nbEdges << ";\n";
-        fileMain << "CSR_READ(CSR_REG_MCYCLE, &dispatch_start);\n";
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &dispatch_start);\n";
     }
 
     // Dispatch.
