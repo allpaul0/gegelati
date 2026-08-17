@@ -221,6 +221,7 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "#include <math.h>\n"
         << "\n"
         << "#include \"externHeader.h\"\n"
+        if (dispatch_instrumented) << "#include \"precalcul/LE_states.h\"\n"
         << "\n"
         << "#define NB_TEAMS " << nbTeams << "\n";
         if (dispatch_instrumented) {
