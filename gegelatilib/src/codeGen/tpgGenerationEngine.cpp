@@ -46,12 +46,15 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg,
     const std::string& path, CodeGen::Dtype dtype,
     bool team_instrumented, bool team_decorated,
+    bool dispatch_instrumented, bool dispatch_decorated,
     std::unique_ptr<ProgramGenerationEngine> progGenEngine)
     : TPGAbstractEngine(tpg), progGenerationEngine{std::move(progGenEngine)}
 {
+    this->dtype = dtype;
     this->team_instrumented = team_instrumented;
     this->team_decorated = team_decorated;
-    this->dtype = dtype;
+    this->dispatch_instrumented = dispatch_instrumented;
+    this->dispatch_decorated = dispatch_decorated;
     
     if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
         !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
@@ -107,6 +110,20 @@ CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
     fileMainH << "#endif" << std::endl;
     fileMain.close();
     fileMainH.close();
+}
+
+CodeGen::TPGGenerationEngine::findNbProgsMax() const
+{
+    size_t maxNbProgs = 0;
+    for (const auto* v : tpg.getVertices()) {
+        if (const auto* team = dynamic_cast<const TPG::TPGTeam*>(v)) {
+            size_t nbProgs = team->getEdges().size();
+            if (nbProgs > maxNbProgs) {
+                maxNbProgs = nbProgs;
+            }
+        }
+    }
+    return maxNbProgs;
 }
 
 #endif // CODE_GENERATION

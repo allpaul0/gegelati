@@ -116,6 +116,15 @@ namespace CodeGen {
         /// start & end labels 
         bool team_decorated;
 
+        /// boolean set if we instrument the dispatch of the TPG at inference 
+        /// all the dispatch mechanism of a given team are surrounded by CSR reads
+        bool dispatch_instrumented;
+
+        /// boolean set if we decorate the dispatch of the TPG at inference
+        /// all the dispatch mechanism of a given team are surrounded by additional
+        /// assembly start & end labels
+        bool dispatch_decorated;
+
         /// Dtype of the generated code
         enum CodeGen::Dtype dtype;
 
@@ -135,6 +144,11 @@ namespace CodeGen {
          * 
          * \param team_decorated denotes decoration at team level for disassembly 
          * inspection
+         * 
+         * \param dispatch_instrumented denotes instrumentation at dispatch level
+         * 
+         * \param dispatch_decorated denotes decoration at dispatch level for disassembly 
+         * inspection
          *
          * \param progGenEngine the engine used to create programs 
          */
@@ -144,6 +158,8 @@ namespace CodeGen {
                             CodeGen::Dtype Dtype = CodeGen::Dtype::Double,
                             bool team_instrumented = false,
                             bool team_decorated = false,
+                            bool dispatch_instrumented = false,
+                            bool dispatch_decorated = false,
                             std::unique_ptr<CodeGen::ProgramGenerationEngine> 
                               progGenEngine = nullptr);
 
@@ -202,6 +218,17 @@ namespace CodeGen {
          * generated.
          */
         virtual void generateAction(const TPG::TPGAction& action) = 0;
+
+        /**
+         * \brief Method for finding the maximum number of progs across teams of the TPG.
+         *
+         * This method iterates through the TPGGraph and find the maximum number
+         * of progs for each team. This value is used to define the size of the
+         * dispatch_cycles array in TPG modelization.
+         *
+         * \return The maximum number of progs across teams of the TPG.
+         */
+        int findNbProgsMax();
     };
 } // namespace CodeGen
 

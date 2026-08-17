@@ -81,7 +81,8 @@ namespace CodeGen {
             const std::string& filename, const TPG::TPGGraph& tpg,
             const std::string& path = "./",
             std::string_view dtype_string = "double", 
-            bool team_instrumented = false, bool team_decorated = false);
+            bool team_instrumented = false, bool team_decorated = false,
+            bool dispatch_instrumented = false, bool dispatch_decorated = false);
 
       private:
         enum generationEngineMode mode;

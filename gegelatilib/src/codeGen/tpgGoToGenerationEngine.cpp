@@ -40,6 +40,7 @@ CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& path, CodeGen::Dtype dtype, 
     bool team_instrumented, bool team_decorated)
     : TPGGenerationEngine(filename, tpg, path, dtype, team_instrumented, team_decorated,
+        dispatch_instrumented, dispatch_decorated,
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
         filename + "_" + filenameProg, tpg.getEnvironment(), path, dtype, NB_INPUTS))
 {
@@ -139,7 +140,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
     // ---- inferenceTPG() signature ----
     fileMain
         << "/* ------------------------------------------------------------ */\n"
-        << "/* Inference — computed goto dispatch                            */\n"
+        << "/* Inference — computed goto dispatch                           */\n"
         << "/* ------------------------------------------------------------ */\n"
         << "\n"
         << "void inferenceTPG(int *actions";
@@ -149,6 +150,10 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << " * __restrict__ in" << i;
     }
     if (team_instrumented) fileMain << ",\n\t\t\t\t\tuint32_t * team_cycles";
+    if (dispatch_instrumented) {
+        fileMain << ",\n\t\t\t\t\uint32_t * dispatch_counts,\n";
+        fileMain << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
+    }
     fileMain << ")\n{\n";
 
     // ---- static jump_table[] ----
@@ -210,7 +215,11 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "\n"
         << "#include \"externHeader.h\"\n"
         << "\n"
-        << "# define NB_TEAMS " << nbTeams << "\n"
+        << "#define NB_TEAMS " << nbTeams << "\n"
+        if (dispatch_instrumented) {
+            fileMainH << "#define NB_PROGS_MAX " << this->findNbProgsMax() << "\n"
+            fileMainH << "#define DISPATCH_RECORDS_SIZE (NB_SEED * (NB_TEAMS + 1))\n";
+        }
         << "\n";
 
     // inferenceTPG declaration with __restrict__-qualified parameters.
@@ -221,6 +230,10 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << " * __restrict__ in" << i;
     }
     if (team_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
+    if (dispatch_instrumented) {
+        fileMain << ",\n\t\t\t\t\uint32_t * dispatch_counts,\n";
+        fileMain << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
+    }
     fileMainH << ");\n" << std::endl;
 }
 
@@ -259,6 +272,13 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     auto label    = vertexName(team);
 
     fileMain << "L_" << label << ": {\n";
+
+    if (dispatch_instrumented) {
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n\n";
+
+        fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n"
+        fileMain << "\t\t\t[dispatch_counts[last_dispatch_size]++] = dispatch_end - dispatch_start;\n";
+    }
 
     // static const int next[] — maps edge index → jump_table index.
     fileMain << "\t\tstatic const int next[" << nbEdges << "] = { ";
@@ -320,6 +340,11 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     if (team_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n";
         fileMain << "\n\t\tteam_cycles[" << id_label  << "] = end - start;\n";
+    }
+
+    if (dispatch_instrumented) {
+        fileMain << "\n\t\tlast_dispatch_size = " << nbEdges << ";\n";
+        fileMain << "CSR_READ(CSR_REG_MCYCLE, &dispatch_start);\n";
     }
 
     // Dispatch.
