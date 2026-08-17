@@ -228,7 +228,7 @@ namespace CodeGen {
          *
          * \return The maximum number of progs across teams of the TPG.
          */
-        int findNbProgsMax();
+        int findNbProgsMax() const;
     };
 } // namespace CodeGen
 

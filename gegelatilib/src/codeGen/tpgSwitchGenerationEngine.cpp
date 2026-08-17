@@ -43,7 +43,7 @@
 CodeGen::TPGSwitchGenerationEngine::TPGSwitchGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path, CodeGen::Dtype dtype)
-    : TPGGenerationEngine(filename, tpg, path, dtype, false, false,
+    : TPGGenerationEngine(filename, tpg, path, dtype, false, false, false, false,
         std::make_unique<CodeGen::ProgramGenerationEngine>(
             filename + "_" + filenameProg, tpg.getEnvironment(), path, dtype, true))
 {

@@ -38,7 +38,8 @@
 CodeGen::TPGGoToGenerationEngine::TPGGoToGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg, 
     const std::string& path, CodeGen::Dtype dtype, 
-    bool team_instrumented, bool team_decorated)
+    bool team_instrumented, bool team_decorated,
+    bool dispatch_instrumented, bool dispatch_decorated)
     : TPGGenerationEngine(filename, tpg, path, dtype, team_instrumented, team_decorated,
         dispatch_instrumented, dispatch_decorated,
         std::make_unique<CodeGen::GotoProgramGenerationEngine>(
@@ -151,7 +152,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
     }
     if (team_instrumented) fileMain << ",\n\t\t\t\t\tuint32_t * team_cycles";
     if (dispatch_instrumented) {
-        fileMain << ",\n\t\t\t\t\uint32_t * dispatch_counts,\n";
+        fileMain << ",\n\t\t\t\t\tuint32_t * dispatch_counts,\n";
         fileMain << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
     }
     fileMain << ")\n{\n";
@@ -215,12 +216,12 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "\n"
         << "#include \"externHeader.h\"\n"
         << "\n"
-        << "#define NB_TEAMS " << nbTeams << "\n"
+        << "#define NB_TEAMS " << nbTeams << "\n";
         if (dispatch_instrumented) {
-            fileMainH << "#define NB_PROGS_MAX " << this->findNbProgsMax() << "\n"
+            fileMainH << "#define NB_PROGS_MAX " << this->findNbProgsMax() << "\n";
             fileMainH << "#define DISPATCH_RECORDS_SIZE (NB_SEED * (NB_TEAMS + 1))\n";
         }
-        << "\n";
+        fileMainH << "\n";
 
     // inferenceTPG declaration with __restrict__-qualified parameters.
     fileMainH << "void inferenceTPG(int *actions";
@@ -231,7 +232,7 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
     }
     if (team_instrumented) fileMainH << ", \n\t\t\t\t\tuint32_t * team_cycles";
     if (dispatch_instrumented) {
-        fileMain << ",\n\t\t\t\t\uint32_t * dispatch_counts,\n";
+        fileMain << ",\n\t\t\t\t\tint32_t * dispatch_counts,\n";
         fileMain << "\t\t\t\t\tuint32_t dispatch_cycles[NB_PROGS_MAX + 1][DISPATCH_RECORDS_SIZE]";
     }
     fileMainH << ");\n" << std::endl;
@@ -276,7 +277,7 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     if (dispatch_instrumented) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &end);\n\n";
 
-        fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n"
+        fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n";
         fileMain << "\t\t\t[dispatch_counts[last_dispatch_size]++] = dispatch_end - dispatch_start;\n";
     }
 

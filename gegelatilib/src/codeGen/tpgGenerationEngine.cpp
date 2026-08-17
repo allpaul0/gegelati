@@ -112,15 +112,13 @@ CodeGen::TPGGenerationEngine::~TPGGenerationEngine()
     fileMainH.close();
 }
 
-CodeGen::TPGGenerationEngine::findNbProgsMax() const
+int CodeGen::TPGGenerationEngine::findNbProgsMax() const
 {
     size_t maxNbProgs = 0;
     for (const auto* v : tpg.getVertices()) {
-        if (const auto* team = dynamic_cast<const TPG::TPGTeam*>(v)) {
-            size_t nbProgs = team->getEdges().size();
-            if (nbProgs > maxNbProgs) {
-                maxNbProgs = nbProgs;
-            }
+        size_t nbProgs = v->getOutgoingEdges().size();
+        if (nbProgs > maxNbProgs) {
+            maxNbProgs = nbProgs;
         }
     }
     return maxNbProgs;
