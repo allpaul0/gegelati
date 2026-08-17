@@ -142,9 +142,7 @@ void CodeGen::TPGGoToGenerationEngine::initTpgFile()
         << "/* Inference — computed goto dispatch                            */\n"
         << "/* ------------------------------------------------------------ */\n"
         << "\n"
-        << "void inferenceTPG(" 
-        << this->dtype
-        << " *actions";
+        << "void inferenceTPG(int *actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
         fileMain << ",\n\t\t\t\t\tconst "
         << this->dtype
@@ -216,9 +214,7 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "\n";
 
     // inferenceTPG declaration with __restrict__-qualified parameters.
-    fileMainH << "void inferenceTPG("
-    << this->dtype
-    << "* actions";
+    fileMainH << "void inferenceTPG(int *actions";
     for (int i = 1; i <= NB_INPUTS; ++i) {
         fileMainH << ", \n\t\t\t\t\tconst "
         << this->dtype

@@ -164,7 +164,7 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "#include <stdbool.h>\n"
         << "#include <math.h>\n\n"
 
-        << "void inferenceTPG(double* action){\n"
+        << "void inferenceTPG(int *action){\n"
         << "\texecuteFromVertex(root, action);\n"
         << "}\n\n"
 
@@ -223,7 +223,7 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << "\tvoid* (*ptr_vertex)(double* action);\n"
               << "}Edge;\n\n"
 
-              << "void inferenceTPG(double* action);\n"
+              << "void inferenceTPG(int *action);\n"
               << "void executeFromVertex(void*(*)(double*), double* action);\n"
               << "void* executeTeam(Edge* e, int nbEdge);\n"
               << "int execute(Edge* e, int nbEdge);\n"

@@ -178,7 +178,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
     fileMain << "};" << std::endl << std::endl;
 
     // generate inference function
-    fileMain << "void inferenceTPG(double* actions) {\n" << std::endl;
+    fileMain << "void inferenceTPG(int *actions) {\n" << std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "
@@ -234,7 +234,7 @@ void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
         << "\n";
     fileMainH << "#include \"externHeader.h\"\n" << std::endl;
 
-    fileMainH << "void inferenceTPG(double* actions);\n" << std::endl;
+    fileMainH << "void inferenceTPG(int *actions);\n" << std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::initActivationFunction()
