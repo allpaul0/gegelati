@@ -282,7 +282,12 @@ void CodeGen::TPGGoToGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     fileMain << "L_" << label << ": {\n";
 
-    if (dispatch_instrumented) {
+    // check if this team is the root
+    bool isRoot = (&team == this->tpg.getRootVertices().at(0));
+
+    // root team shall not be instumented as there is nothing 
+    // to measure before the first dispatch
+    if (dispatch_instrumented && !isRoot) {
         fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &dispatch_end);\n\n";
 
         fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n";
@@ -371,7 +376,18 @@ void CodeGen::TPGGoToGenerationEngine::generateAction(
     const TPG::TPGAction& action)
 {
     uint64_t id = action.getActionID();
-    fileMain << "L_A" << id << ": actions[0] = " << id << "; return;\n";
+
+    if (dispatch_instrumented) {
+        fileMain << "L_A" << id << ": {\n";
+        fileMain << "\t\tCSR_READ(CSR_REG_MCYCLE, &dispatch_end);\n\n";
+        fileMain << "\t\tdispatch_cycles[last_dispatch_size]\n";
+        fileMain << "\t\t\t[dispatch_counts[last_dispatch_size]++] = dispatch_end - dispatch_start;\n\n";
+        fileMain << "\t\tactions[0] = " << id << "; return;\n";
+        fileMain << "}\n";
+    }
+    else{
+        fileMain << "L_A" << id << ": actions[0] = " << id << "; return;\n";
+    }
 }
 
 // ============================================================
