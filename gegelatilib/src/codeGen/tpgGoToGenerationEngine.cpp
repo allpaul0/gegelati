@@ -220,9 +220,9 @@ void CodeGen::TPGGoToGenerationEngine::initHeaderFile()
         << "#include <stdint.h>\n"
         << "#include <math.h>\n"
         << "\n"
-        << "#include \"externHeader.h\"\n"
-        if (dispatch_instrumented) << "#include \"precalcul/LE_states.h\"\n"
-        << "\n"
+        << "#include \"externHeader.h\"\n";
+        if (dispatch_instrumented) fileMainH << "#include \"precalcul/LE_states.h\"\n";
+        fileMainH << "\n"
         << "#define NB_TEAMS " << nbTeams << "\n";
         if (dispatch_instrumented) {
             fileMainH << "#define NB_PROGS_MAX " << this->findNbProgsMax() << "\n";
