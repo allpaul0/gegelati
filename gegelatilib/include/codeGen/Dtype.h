@@ -71,7 +71,7 @@ namespace CodeGen {
   constexpr CodeGen::Dtype dtype_from_string(std::string_view dtype_string) {
     if (dtype_string == "double") {
         return Dtype::Double;
-    } else if (dtype_string == "float") {
+    } else if (dtype_string == "float" || dtype_string == "float_iset32" || dtype_string == "float_iset64") {
         return Dtype::Float;
     } else if (dtype_string == "fixedpt") {
         return Dtype::Fixedpt;
