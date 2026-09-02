@@ -73,7 +73,7 @@ namespace CodeGen {
         return Dtype::Double;
     } else if (dtype_string == "float" || dtype_string == "float_iset32" || dtype_string == "float_iset64") {
         return Dtype::Float;
-    } else if (dtype_string == "fixedpt") {
+    } else if (dtype_string == "fixedpt" || dtype_string == "fixedpt_iset32" || dtype_string == "fixedpt_iset64") {
         return Dtype::Fixedpt;
     } else if (dtype_string == "int") {
         return Dtype::Int;
